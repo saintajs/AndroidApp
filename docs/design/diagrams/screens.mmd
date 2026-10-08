@@ -1,0 +1,19 @@
+flowchart LR
+    subgraph sg_authentication["Authentication"]
+        ui_s01_signin["S-01 — Iniciar sesión"]
+    end
+    subgraph sg_incident_management["Incident management"]
+        ui_s02_incidents["S-02 — Mis incidencias"]
+        ui_s03_new_incident["S-03 — Nueva incidencia"]
+        ui_s04_detail["S-04 — Detalle de incidencia"]
+    end
+    ui_s01_signin -->|"Primary button - valid credentials (BR-003)"| ui_s02_incidents
+    ui_s02_incidents -->|"FAB +"| ui_s03_new_incident
+    ui_s03_new_incident -->|"Guardar incidencia - 201 created"| ui_s02_incidents
+    ui_s03_new_incident -->|"Volver back button"| ui_s02_incidents
+    ui_s02_incidents -->|"Tap incident card"| ui_s04_detail
+    ui_s04_detail -->|"Mis incidencias back button"| ui_s02_incidents
+    ui_s02_incidents -->|"Salir app-bar button - token deleted (BR-005)"| ui_s01_signin
+    ui_s02_incidents -->|"401 No autenticado - token cleared (no refresh, Q-008)"| ui_s01_signin
+    ui_s03_new_incident -->|"401 No autenticado - token cleared"| ui_s01_signin
+    ui_s04_detail -->|"401 No autenticado - token cleared"| ui_s01_signin

@@ -1,0 +1,47 @@
+flowchart LR
+  subgraph sg_api_routes["API routes (FastAPI)"]
+    cmp_auth_routes["Auth routes"]
+    cmp_incident_routes["Incidents routes"]
+    cmp_health_route["Health route"]
+  end
+  subgraph sg_api_core["Core (cross-cutting)"]
+    cmp_deps_core["API dependencies - bearer-token extraction, role and owner guards"]
+    cmp_security_core["Security - PyJWT 2.15.1 HS256 allow-list decode (BR-004)"]
+    cmp_ratelimit_core["Rate-limit dependencies - in-memory per-IP and per-email (BR-007)"]
+    cmp_config_core["Settings - pydantic-settings env vars (BR-029)"]
+  end
+  subgraph sg_api_domain["Domain (services + schemas)"]
+    cmp_auth_service["AuthService - email normalization + bcrypt verify (BR-008, BR-026)"]
+    cmp_incident_service["IncidentService - owner-scoped list, detail, create (BR-009, BR-011)"]
+    cmp_transition_service["StatusTransitionService - linear transition matrix + history insert (BR-023, BR-024, BR-025)"]
+    cmp_schemas["Pydantic v2 request/response schemas (BR-018)"]
+  end
+  subgraph sg_api_db["Persistence (SQLAlchemy repositories)"]
+    cmp_user_repo["UserRepository"]
+    cmp_incident_repo["IncidentRepository"]
+    cmp_history_repo["IncidentHistoryRepository"]
+    cmp_session["SQLAlchemy 2.0.54 session - psycopg 3"]
+    cmp_alembic["Alembic 1.20.0 migrations - 0001_initial_schema.py"]
+    cmp_demo_seed["demo_seed - idempotent dev seed (FUNC-009, BR-033)"]
+  end
+  db_postgres[("PostgreSQL 16.15")]
+  cmp_auth_routes -->|"POST /api/auth/login"| cmp_ratelimit_core
+  cmp_auth_routes -->|"POST /api/auth/login"| cmp_auth_service
+  cmp_auth_routes -->|"GET /api/me"| cmp_deps_core
+  cmp_deps_core -->|"validates bearer JWT"| cmp_security_core
+  cmp_incident_routes -->|"GET /api/incidents"| cmp_incident_service
+  cmp_incident_routes -->|"POST /api/incidents"| cmp_incident_service
+  cmp_incident_routes -->|"GET /api/incidents/{id}"| cmp_incident_service
+  cmp_incident_routes -->|"PATCH /api/incidents/{id}/status"| cmp_transition_service
+  cmp_incident_routes -->|"PATCH /api/incidents/{id}/status - role guard (BR-022)"| cmp_deps_core
+  cmp_auth_service -->|"loads user by normalized email"| cmp_user_repo
+  cmp_incident_service -->|"owner-scoped queries (BR-009)"| cmp_incident_repo
+  cmp_transition_service -->|"inserts immutable history (BR-025)"| cmp_history_repo
+  cmp_incident_service -->|"validates request bodies"| cmp_schemas
+  cmp_ratelimit_core -->|"reads thresholds (BR-007)"| cmp_config_core
+  cmp_user_repo --> cmp_session
+  cmp_incident_repo --> cmp_session
+  cmp_history_repo --> cmp_session
+  cmp_session -->|"parameterized SQL only (BR-027)"| db_postgres
+  cmp_alembic -->|"creates schema"| db_postgres
+  cmp_demo_seed -->|"idempotent inserts (FUNC-009)"| db_postgres

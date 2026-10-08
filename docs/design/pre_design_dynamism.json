@@ -1,0 +1,46 @@
+{
+  "components": [
+    {
+      "name": "Sign-in form",
+      "behavior": "Validates that both credential fields are filled, disables the button while a simulated 600ms request runs, accepts exactly admin/admin to enter the app, and shows a generic inline error for anything else without revealing whether the account exists.",
+      "state": "authed flag, required-field validation state, pending-submission lock",
+      "maps_to": "FUNC-001 Sign in with email and password"
+    },
+    {
+      "name": "Sign out action",
+      "behavior": "Header 'Salir' button on the incident list resets the authenticated state and returns to the sign-in screen with a confirmation toast.",
+      "state": "clears authed flag and resets active filter",
+      "maps_to": "FUNC-002 Sign out"
+    },
+    {
+      "name": "Status filter chips",
+      "behavior": "Tapping Todas/Pendiente/En progreso/Resuelta filters the in-page incident array by status and updates each chip's live count badge.",
+      "state": "selected filter key; recomputed per-status counts from the incidents array",
+      "maps_to": "FUNC-004 Filter incidents by status"
+    },
+    {
+      "name": "Incident list",
+      "behavior": "Renders only the owned incidents newest-first (title, category, priority, status badge, creation date) and shows an empty state when the active filter matches nothing.",
+      "state": "incidents array filtered by current filter, sorted by creation date descending",
+      "maps_to": "FUNC-003 View my incidents list"
+    },
+    {
+      "name": "New incident form",
+      "behavior": "Live per-field validation (title 5-100 chars, description 10-1000 chars with char counters, required category and priority choice groups), disables the submit button while saving, then prepends a new Pendiente incident with an initial history entry and returns to the list with a confirmation toast.",
+      "state": "form field values, touched flags, selected category/priority, duplicate-submission lock",
+      "maps_to": "FUNC-005 Create a new incident (with INSTR-002 initial Pending status)"
+    },
+    {
+      "name": "Incident detail with status history",
+      "behavior": "Tapping a list card opens the detail view showing identifier, title, description, category, priority, status badge, creation date, and a newest-first chronological status-history timeline; a missing id renders a safe no-access state.",
+      "state": "selected incident id used to look up the in-page incident and its history entries",
+      "maps_to": "FUNC-006 View incident details and status history"
+    },
+    {
+      "name": "Screen navigation",
+      "behavior": "Bottom navigation bar plus drill-down (list to detail, FAB and back buttons) switches between the four screens via JS view switching, scrolling each view back to top.",
+      "state": "currently active screen id",
+      "maps_to": "Navigation between S-01/S-02/S-03/S-04"
+    }
+  ]
+}

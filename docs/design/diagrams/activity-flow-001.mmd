@@ -1,0 +1,30 @@
+flowchart TD
+    subgraph sg_lane_employee["Employee"]
+        n_start(["Open app without valid token"])
+        act_enter(["Enter Correo electrónico and Contraseña"])
+        n_fielderr(["Show Spanish per-field errors (INSTR-011)"])
+        n_429(["429 - Demasiados intentos. Inténtelo de nuevo más tarde. + Retry-After"])
+        n_401(["401 - Credenciales inválidas - generic inline error"])
+        n_home(["S-02 Mis incidencias - session valid 8 h"])
+    end
+    subgraph sg_lane_app["mobile-app"]
+        d_fields{"Both fields filled? (BR-001)"}
+        act_submit(["Tap primary button - locked while in flight (BR-003)"])
+        act_store(["Store token in Keystore-backed storage (BR-006)"])
+        act_me(["Optional GET /api/me for the S-02 subtitle"])
+    end
+    subgraph sg_lane_api["api"]
+        d_rl{"Failure budget available? (BR-007)"}
+        d_cred{"Credentials valid and account active? (BR-002)"}
+    end
+    n_start --> act_enter
+    act_enter --> d_fields
+    d_fields -->|"no"| n_fielderr
+    d_fields -->|"yes"| act_submit
+    act_submit --> d_rl
+    d_rl -->|"no"| n_429
+    d_rl -->|"yes"| d_cred
+    d_cred -->|"no - uniform 401, no account leak"| n_401
+    d_cred -->|"yes"| act_store
+    act_store --> act_me
+    act_me --> n_home

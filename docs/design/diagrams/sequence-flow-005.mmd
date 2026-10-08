@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant usr_employee as "Employee"
+    participant ui_app as "mobile-app (Compose)"
+    participant svc_api as "api (FastAPI)"
+    participant db_postgres as "PostgreSQL"
+    usr_employee->>ui_app: sign in on S-01
+    ui_app->>svc_api: POST /api/auth/login
+    svc_api-->>ui_app: 200 access_token JWT HS256 exp = issued + 28800 seconds - claims sub role exp (CONF-001)
+    Note over ui_app: token stored Keystore-backed - never plain text or logs (CONF-002, BR-006)
+    loop every protected call while the session lasts
+        ui_app->>svc_api: GET /api/incidents or POST /api/incidents or GET /api/incidents/{id} or GET /api/me - Authorization Bearer JWT
+        Note over svc_api: decode pinned to algorithms HS256 allow-list (BR-004)
+        svc_api-->>ui_app: 200 responses
+    end
+    alt employee taps Salir on S-02
+        Note over ui_app: NO server sign-out endpoint and NO refresh endpoint (Q-008) - client deletes the Keystore token (FUNC-002, BR-005)
+        ui_app-->>usr_employee: confirmation toast - route to S-01 - protected screens unreachable
+    else token expired after 8 hours
+        svc_api-->>ui_app: 401 detail No autenticado
+        Note over ui_app: expired-token recovery flow - clear token - route S-01
+    else account deactivated mid-session (active = false)
+        svc_api-->>ui_app: 403 detail Cuenta inactiva
+        ui_app-->>usr_employee: clear token - route S-01 (INSTR-001 rationale)
+    end

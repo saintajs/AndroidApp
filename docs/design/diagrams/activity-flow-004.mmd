@@ -1,0 +1,28 @@
+flowchart TD
+  subgraph sg_lane_support["Support agent"]
+    n_start(["Start"])
+  end
+  subgraph sg_lane_api["api"]
+    act_patch["PATCH /api/incidents/{id}/status with new_status"]
+    d_role{"Caller role is support? (BR-022)"}
+    d_found{"Incident exists? (BR-010)"}
+    d_legal{"Linear transition legal? (BR-023, BR-024)"}
+    act_write["One transaction - update incidents status + insert immutable incident_history (BR-025)"]
+    n_ok(["200 - incident + latest_history"])
+    n_403(["403 - No autorizado"])
+    n_404(["404 - Incidencia no encontrada"])
+    n_409(["409 - Transición de estado no válida"])
+  end
+  subgraph sg_lane_db["Database"]
+    act_db["UPDATE incidents + INSERT incident_history"]
+  end
+  n_start -->|"authenticate POST /api/auth/login"| act_patch
+  act_patch --> d_role
+  d_role -->|"no - checked before any lookup"| n_403
+  d_role -->|"yes"| d_found
+  d_found -->|"no"| n_404
+  d_found -->|"yes"| d_legal
+  d_legal -->|"no"| n_409
+  d_legal -->|"yes"| act_write
+  act_write --> act_db
+  act_db --> n_ok

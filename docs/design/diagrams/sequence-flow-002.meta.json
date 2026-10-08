@@ -1,0 +1,138 @@
+{
+  "key": "sequence-flow-002",
+  "edges": {
+    "svc_api->ui_app": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "ui_app->svc_api": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "svc_api->ui_app#2": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-013",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "svc_api->ui_app#3": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "svc_api->ui_app#4": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ],
+    "db_postgres->svc_api": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ],
+    "svc_api->db_postgres": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-011",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "ui_app->usr_employee": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-019",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "usr_employee->ui_app": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-013",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "svc_api->db_postgres#2": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_app->usr_employee#2": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ]
+  },
+  "nodes": {
+    "ui_app": {
+      "kind": "service",
+      "label": "mobile-app (Compose)",
+      "source": [
+        {
+          "artifact": "Mobile app - Kotlin + Jetpack Compose",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "svc_api": {
+      "kind": "service",
+      "label": "api (FastAPI)",
+      "source": [
+        {
+          "artifact": "API - FastAPI",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "db_postgres": {
+      "kind": "database",
+      "label": "PostgreSQL",
+      "source": [
+        {
+          "artifact": "Database - PostgreSQL",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "usr_employee": {
+      "kind": "actor",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-002 Incident creation flow"
+}

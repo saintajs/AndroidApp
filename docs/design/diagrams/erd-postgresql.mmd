@@ -1,0 +1,31 @@
+erDiagram
+  users {
+    string id PK "UUID gen_random_uuid()"
+    string email UK "normalized trimmed lowercase (INSTR-006)"
+    string password_hash "salted bcrypt hash - never logged (INSTR-008)"
+    string role "employee or support - CHECK (BR-008 role set CONF-001)"
+    boolean active "default TRUE - deactivation flag"
+    datetime created_at "TIMESTAMPTZ now()"
+  }
+  incidents {
+    string id PK "UUID gen_random_uuid()"
+    string owner_id FK "to users.id - ON DELETE RESTRICT - never client input (INSTR-002)"
+    string title "5-100 chars (BR-013)"
+    string description "10-1000 chars (BR-014) - omitted from list responses"
+    string category "systems equipment access other (BR-015)"
+    string priority "low medium high (BR-016)"
+    string status "pending in_progress resolved - default pending (BR-011, BR-017)"
+    datetime created_at "TIMESTAMPTZ - list order DESC (BR-019)"
+    datetime updated_at "TIMESTAMPTZ - set with history insert"
+  }
+  incident_history {
+    string id PK "UUID gen_random_uuid()"
+    string incident_id FK "to incidents.id - ON DELETE RESTRICT"
+    string previous_status "nullable - NULL marks initial creation entry (INSTR-002, BR-025)"
+    string new_status "pending in_progress resolved"
+    string changed_by FK "to users.id - actor of the transition (INSTR-005)"
+    datetime changed_at "TIMESTAMPTZ - timeline order ASC"
+  }
+  users ||--o{ incidents : "owns"
+  incidents ||--o{ incident_history : "accumulates"
+  users ||--o{ incident_history : "performs"

@@ -1,0 +1,82 @@
+{
+  "key": "architecture-context",
+  "edges": {
+    "usr_employee->sys_minisoporte": [
+      {
+        "artifact": "Android app \u2194 REST API (first-party, internal)",
+        "section_file": "external-integrations.md"
+      }
+    ],
+    "usr_developer->sys_minisoporte": [
+      {
+        "artifact": "Android app \u2194 REST API (first-party, internal)",
+        "section_file": "external-integrations.md"
+      },
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "usr_support_agent->sys_minisoporte": [
+      {
+        "artifact": "Android app \u2194 REST API (first-party, internal)",
+        "section_file": "external-integrations.md"
+      },
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      }
+    ]
+  },
+  "nodes": {
+    "usr_employee": {
+      "kind": "actor",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "usr_developer": {
+      "kind": "actor",
+      "label": "Developer / reviewer",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sys_minisoporte": {
+      "kind": "service",
+      "label": "MiniSoporte - mobile-app + api + PostgreSQL 16.15",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "PostgreSQL 16.15",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "usr_support_agent": {
+      "kind": "actor",
+      "label": "Support agent - API-only in v1",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "System context - MiniSoporte actors and zero external integrations"
+}

@@ -1,0 +1,41 @@
+flowchart TD
+    subgraph sg_lane_employee["Employee"]
+        n_start(["S-02 entry or retry"])
+        n_empty(["Empty state - Sin incidencias"])
+        act_chip(["Tap filter chip - Todas Pendiente En progreso Resuelta (FUNC-004, BR-017)"])
+        act_card(["Tap incident card"])
+        n_404(["Safe no-access state - Incidencia no disponible"])
+        n_s04(["S-04 Detalle - full data + Historial de estados ascending (BR-021)"])
+        n_back(["Mis incidencias back button"])
+    end
+    subgraph sg_lane_app["mobile-app"]
+        d_net{"Response ok?"}
+        n_retry(["Recoverable error state with retry (CONF-009)"])
+        n_recover(["Expired-token recovery - route S-01"])
+        d_empty{"Any incidents?"}
+        n_cards(["Render cards - title, category, priority, status badge, Creada el date"])
+    end
+    subgraph sg_lane_api["api"]
+        act_list(["GET /api/incidents - owner-scoped, newest first (BR-009, BR-019, BR-020)"])
+        act_list2(["GET /api/incidents?status=..."])
+        act_detail(["GET /api/incidents/{id}"])
+        d_owner{"Owner and exists? (BR-010)"}
+    end
+    n_start --> act_list
+    act_list --> d_net
+    d_net -->|"network error"| n_retry
+    n_retry -->|"retry"| act_list
+    d_net -->|"401"| n_recover
+    d_net -->|"200"| d_empty
+    d_empty -->|"no"| n_empty
+    d_empty -->|"yes"| n_cards
+    n_cards --> act_chip
+    act_chip --> act_list2
+    act_list2 --> d_empty
+    n_cards --> act_card
+    act_card --> act_detail
+    act_detail --> d_owner
+    d_owner -->|"no"| n_404
+    d_owner -->|"yes"| n_s04
+    n_s04 --> n_back
+    n_back --> n_cards

@@ -1,0 +1,28 @@
+sequenceDiagram
+  participant usr_support_agent as "Support agent"
+  participant svc_api as "api (FastAPI)"
+  participant db_postgres as "PostgreSQL"
+  usr_support_agent->>svc_api: POST /api/auth/login
+  svc_api->>db_postgres: SELECT users WHERE email = normalized email (INSTR-006)
+  db_postgres-->>svc_api: user row with bcrypt password_hash
+  svc_api-->>usr_support_agent: 200 access_token JWT HS256 with role support claim - expires_in_seconds 28800
+  usr_support_agent->>svc_api: PATCH /api/incidents/{id}/status body new_status
+  Note over svc_api: role checked BEFORE any lookup (BR-022, INSTR-004)
+  alt caller role is employee
+    svc_api-->>usr_support_agent: 403 detail No autorizado
+  else caller role is support
+    svc_api->>db_postgres: SELECT incidents WHERE id
+    alt incident missing or not found
+      svc_api-->>usr_support_agent: 404 detail Incidencia no encontrada (BR-010)
+    else incident found
+      Note over svc_api: linear matrix validated BEFORE any write (BR-023, BR-024)
+      alt transition illegal (backwards, skipped, repeated, or out of resolved)
+        svc_api-->>usr_support_agent: 409 detail Transición de estado no válida
+      else transition accepted
+        svc_api->>db_postgres: one transaction - UPDATE incidents status and updated_at + INSERT incident_history (previous_status, new_status, changed_by, changed_at) (BR-025)
+        db_postgres-->>svc_api: committed
+        svc_api-->>usr_support_agent: 200 incident + latest_history
+      end
+    end
+  end
+  Note over usr_support_agent,db_postgres: FLOW-004 - immutable history entry per accepted transition (INSTR-005, BR-025)

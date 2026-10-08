@@ -1,0 +1,404 @@
+{
+  "key": "architecture-api",
+  "edges": {
+    "cmp_alembic->db_postgres": [
+      {
+        "artifact": "PostgreSQL 16.15",
+        "section_file": "components.md"
+      }
+    ],
+    "cmp_session->db_postgres": [
+      {
+        "artifact": "BR-027",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_demo_seed->db_postgres": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "cmp_user_repo->cmp_session": [
+      {
+        "artifact": "api",
+        "section_file": "components.md"
+      }
+    ],
+    "cmp_history_repo->cmp_session": [
+      {
+        "artifact": "api",
+        "section_file": "components.md"
+      }
+    ],
+    "cmp_auth_routes->cmp_deps_core": [
+      {
+        "artifact": "GET /api/me",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "cmp_incident_repo->cmp_session": [
+      {
+        "artifact": "api",
+        "section_file": "components.md"
+      }
+    ],
+    "cmp_auth_service->cmp_user_repo": [
+      {
+        "artifact": "BR-008",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_deps_core->cmp_security_core": [
+      {
+        "artifact": "BR-004",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_auth_routes->cmp_auth_service": [
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "cmp_incident_service->cmp_schemas": [
+      {
+        "artifact": "BR-018",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_auth_routes->cmp_ratelimit_core": [
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "BR-007",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_ratelimit_core->cmp_config_core": [
+      {
+        "artifact": "BR-007",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_incident_routes->cmp_deps_core#2": [
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "BR-022",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_incident_service->cmp_incident_repo": [
+      {
+        "artifact": "BR-009",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_transition_service->cmp_history_repo": [
+      {
+        "artifact": "BR-025",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_incident_routes->cmp_incident_service": [
+      {
+        "artifact": "GET /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "cmp_incident_routes->cmp_incident_service#2": [
+      {
+        "artifact": "POST /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "cmp_incident_routes->cmp_incident_service#3": [
+      {
+        "artifact": "GET /api/incidents/{id}",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "cmp_incident_routes->cmp_transition_service": [
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      }
+    ]
+  },
+  "nodes": {
+    "sg_api_db": {
+      "kind": "component",
+      "label": "Persistence (SQLAlchemy repositories)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_alembic": {
+      "kind": "component",
+      "label": "Alembic 1.20.0 migrations - 0001_initial_schema.py",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_schemas": {
+      "kind": "component",
+      "label": "Pydantic v2 request/response schemas (BR-018)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-018",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_session": {
+      "kind": "component",
+      "label": "SQLAlchemy 2.0.54 session - psycopg 3",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "db_postgres": {
+      "kind": "database",
+      "label": "PostgreSQL 16.15",
+      "source": [
+        {
+          "artifact": "PostgreSQL 16.15",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_api_core": {
+      "kind": "component",
+      "label": "Core (cross-cutting)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_demo_seed": {
+      "kind": "component",
+      "label": "demo_seed - idempotent dev seed (FUNC-009, BR-033)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-033",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_deps_core": {
+      "kind": "component",
+      "label": "API dependencies - bearer-token extraction, role and owner guards",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_user_repo": {
+      "kind": "component",
+      "label": "UserRepository",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_api_domain": {
+      "kind": "component",
+      "label": "Domain (services + schemas)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_api_routes": {
+      "kind": "component",
+      "label": "API routes (FastAPI)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_auth_routes": {
+      "kind": "component",
+      "label": "Auth routes",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_config_core": {
+      "kind": "component",
+      "label": "Settings - pydantic-settings env vars (BR-029)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-029",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_auth_service": {
+      "kind": "component",
+      "label": "AuthService - email normalization + bcrypt verify (BR-008, BR-026)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-008",
+          "section_file": "business-rules.md"
+        },
+        {
+          "artifact": "BR-026",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_health_route": {
+      "kind": "component",
+      "label": "Health route",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_history_repo": {
+      "kind": "component",
+      "label": "IncidentHistoryRepository",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_incident_repo": {
+      "kind": "component",
+      "label": "IncidentRepository",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_security_core": {
+      "kind": "component",
+      "label": "Security - PyJWT 2.15.1 HS256 allow-list decode (BR-004)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-004",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_ratelimit_core": {
+      "kind": "component",
+      "label": "Rate-limit dependencies - in-memory per-IP and per-email (BR-007)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-007",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_incident_routes": {
+      "kind": "component",
+      "label": "Incidents routes",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_incident_service": {
+      "kind": "component",
+      "label": "IncidentService - owner-scoped list, detail, create (BR-009, BR-011)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-009",
+          "section_file": "business-rules.md"
+        },
+        {
+          "artifact": "BR-011",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_transition_service": {
+      "kind": "component",
+      "label": "StatusTransitionService - linear transition matrix + history insert (BR-023, BR-024, BR-025)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-023",
+          "section_file": "business-rules.md"
+        },
+        {
+          "artifact": "BR-024",
+          "section_file": "business-rules.md"
+        },
+        {
+          "artifact": "BR-025",
+          "section_file": "business-rules.md"
+        }
+      ]
+    }
+  },
+  "title": "api container - layered FastAPI routes, core, domain, persistence"
+}

@@ -1,0 +1,6 @@
+# MiniSoporte — uv workspace root.
+# Members live under services/* (currently only services/api).
+# Install/lock from the workspace root or the member dir — ONE shared lockfile.
+
+[tool.uv.workspace]
+members = ["services/*"]

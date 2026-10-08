@@ -1,0 +1,236 @@
+{
+  "key": "activity-expired-token-recovery",
+  "edges": {
+    "d_401->n_retry": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_valid->n_s02": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_call->d_401": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_clear->n_s01": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-005",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_401->act_clear": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-005",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "n_start->act_call": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_login->d_valid": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_s01->act_reenter": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_valid->n_401login": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-002",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "act_reenter->act_login": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ]
+  },
+  "nodes": {
+    "d_401": {
+      "kind": "decision",
+      "label": "401 No autenticado received? (Q-008 - no refresh)",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_s01": {
+      "kind": "action",
+      "label": "Route to S-01 Iniciar sesi\u00f3n",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_s02": {
+      "kind": "action",
+      "label": "New 8 h JWT - restart at S-02 with fresh list",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "d_valid": {
+      "kind": "decision",
+      "label": "Valid credentials?",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_retry": {
+      "kind": "action",
+      "label": "Keep recoverable error + retry on current screen (CONF-009)",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_start": {
+      "kind": "action",
+      "label": "Protected call from S-02, S-03 or S-04",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_call": {
+      "kind": "action",
+      "label": "Bearer call to a protected endpoint",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_clear": {
+      "kind": "action",
+      "label": "Clear Keystore token - no silent retry (BR-005)",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-005",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_login": {
+      "kind": "action",
+      "label": "POST /api/auth/login",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "POST /api/auth/login",
+          "section_file": "api-contract.md"
+        }
+      ]
+    },
+    "n_401login": {
+      "kind": "action",
+      "label": "401 Credenciales inv\u00e1lidas - generic inline error (BR-002)",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-002",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_reenter": {
+      "kind": "action",
+      "label": "Employee re-enters credentials",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_api": {
+      "kind": "action",
+      "label": "api",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_app": {
+      "kind": "action",
+      "label": "mobile-app",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_employee": {
+      "kind": "action",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "Expired-token recovery (401 \u2192 re-authenticate)"
+}

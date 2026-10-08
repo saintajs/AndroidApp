@@ -1,0 +1,250 @@
+{
+  "key": "activity-flow-002",
+  "edges": {
+    "act_post->d_auth": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_fill->d_valid": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-013",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_auth->d_created": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_auth->n_recover": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_created->n_done": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "d_valid->act_save": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_start->act_fill": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_save->act_post": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "d_valid->n_fielderr": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-018",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_created->n_fielderr": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ]
+  },
+  "nodes": {
+    "d_auth": {
+      "kind": "decision",
+      "label": "Token valid?",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_done": {
+      "kind": "action",
+      "label": "Return to S-02 - new Pendiente card first (BR-019)",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-019",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "d_valid": {
+      "kind": "decision",
+      "label": "All fields within rules - title 5-100, description 10-1000, category and priority chosen? (BR-013, BR-014, BR-015, BR-016)",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-013",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_start": {
+      "kind": "action",
+      "label": "Tap FAB + on S-02",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_fill": {
+      "kind": "action",
+      "label": "Fill T\u00edtulo, Categor\u00eda, Prioridad, Descripci\u00f3n with live counters",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-013",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_post": {
+      "kind": "action",
+      "label": "POST /api/incidents with Bearer JWT - extra=forbid, status always pending (INSTR-002)",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "POST /api/incidents",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-011",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_save": {
+      "kind": "action",
+      "label": "Tap Guardar incidencia - locks to Guardando\u2026",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-018",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "d_created": {
+      "kind": "decision",
+      "label": "Server accepts (201)? (BR-011)",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "POST /api/incidents",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-011",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_recover": {
+      "kind": "action",
+      "label": "Expired-token recovery - clear token, route S-01",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_fielderr": {
+      "kind": "action",
+      "label": "Field-level errors - nothing created (INSTR-011, BR-018)",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-018",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "sg_lane_api": {
+      "kind": "action",
+      "label": "api",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_app": {
+      "kind": "action",
+      "label": "mobile-app",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_employee": {
+      "kind": "action",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "FLOW-002",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-002 Incident creation flow"
+}

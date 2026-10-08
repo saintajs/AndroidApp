@@ -1,0 +1,256 @@
+{
+  "key": "activity-flow-006",
+  "edges": {
+    "d_env->n_abort": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-033",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_env->act_seed": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_health->n_fail": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_start->act_env": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_schema->d_env": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_health->n_ready": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_env->act_migrate": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_health->d_health": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "GET /health",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "act_seed->act_health": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_migrate->act_schema": [
+      {
+        "artifact": "FLOW-006",
+        "section_file": "flows.md"
+      }
+    ]
+  },
+  "nodes": {
+    "d_env": {
+      "kind": "decision",
+      "label": "Both demo password env vars set? (BR-033)",
+      "source": [
+        {
+          "artifact": "BR-033",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_fail": {
+      "kind": "action",
+      "label": "Check process logs - sanitized 500 handler, no response-body details",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-032",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_env": {
+      "kind": "action",
+      "label": "Set DEMO_EMPLOYEE_PASSWORD, DEMO_SUPPORT_PASSWORD, TEST_DATABASE_URL (BR-029)",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-029",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_abort": {
+      "kind": "action",
+      "label": "Seed aborts with clear message - nothing created",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-033",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_ready": {
+      "kind": "action",
+      "label": "Environment ready - demo sign-in works",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_start": {
+      "kind": "action",
+      "label": "Start",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_seed": {
+      "kind": "action",
+      "label": "Run idempotent demo_seed (FUNC-009)",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "d_health": {
+      "kind": "decision",
+      "label": "200 status ok?",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_health": {
+      "kind": "action",
+      "label": "GET /health (BR-032)",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "GET /health",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-032",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_schema": {
+      "kind": "action",
+      "label": "Create users, incidents, incident_history",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "users",
+          "section_file": "data-model.md"
+        },
+        {
+          "artifact": "incidents",
+          "section_file": "data-model.md"
+        },
+        {
+          "artifact": "incident_history",
+          "section_file": "data-model.md"
+        }
+      ]
+    },
+    "sg_lane_db": {
+      "kind": "participant",
+      "label": "Database",
+      "source": [
+        {
+          "artifact": "PostgreSQL 16.15",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_migrate": {
+      "kind": "action",
+      "label": "Run Alembic migration 0001_initial_schema.py (CONF-008)",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_api": {
+      "kind": "participant",
+      "label": "api",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_developer": {
+      "kind": "participant",
+      "label": "Developer",
+      "source": [
+        {
+          "artifact": "FLOW-006",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-006 Development environment initialization"
+}

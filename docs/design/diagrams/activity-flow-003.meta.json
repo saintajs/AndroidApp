@@ -1,0 +1,370 @@
+{
+  "key": "activity-flow-003",
+  "edges": {
+    "n_s04->n_back": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_net->d_empty": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_net->n_retry": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_owner->n_404": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-010",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_owner->n_s04": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "GET /api/incidents/{id}",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "act_list->d_net": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_back->n_cards": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_empty->n_cards": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_empty->n_empty": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_net->n_recover": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_cards->act_card": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_cards->act_chip": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_retry->act_list": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_start->act_list": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "GET /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "act_list2->d_empty": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "GET /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "act_chip->act_list2": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-017",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "act_detail->d_owner": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_card->act_detail": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "GET /api/incidents/{id}",
+        "section_file": "api-contract.md"
+      }
+    ]
+  },
+  "nodes": {
+    "d_net": {
+      "kind": "decision",
+      "label": "Response ok?",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_404": {
+      "kind": "action",
+      "label": "Safe no-access state - Incidencia no disponible",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-010",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_s04": {
+      "kind": "action",
+      "label": "S-04 Detalle - full data + Historial de estados ascending (BR-021)",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-021",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_back": {
+      "kind": "action",
+      "label": "Mis incidencias back button",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "d_empty": {
+      "kind": "decision",
+      "label": "Any incidents?",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "d_owner": {
+      "kind": "decision",
+      "label": "Owner and exists? (BR-010)",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "GET /api/incidents/{id}",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-010",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_cards": {
+      "kind": "action",
+      "label": "Render cards - title, category, priority, status badge, Creada el date",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_empty": {
+      "kind": "action",
+      "label": "Empty state - Sin incidencias",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_retry": {
+      "kind": "action",
+      "label": "Recoverable error state with retry (CONF-009)",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_start": {
+      "kind": "action",
+      "label": "S-02 entry or retry",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_card": {
+      "kind": "action",
+      "label": "Tap incident card",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_chip": {
+      "kind": "action",
+      "label": "Tap filter chip - Todas Pendiente En progreso Resuelta (FUNC-004, BR-017)",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-017",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_list": {
+      "kind": "action",
+      "label": "GET /api/incidents - owner-scoped, newest first (BR-009, BR-019, BR-020)",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "GET /api/incidents",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-009",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_list2": {
+      "kind": "action",
+      "label": "GET /api/incidents?status=...",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "GET /api/incidents",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-017",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_recover": {
+      "kind": "action",
+      "label": "Expired-token recovery - route S-01",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_detail": {
+      "kind": "action",
+      "label": "GET /api/incidents/{id}",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "GET /api/incidents/{id}",
+          "section_file": "api-contract.md"
+        }
+      ]
+    },
+    "sg_lane_api": {
+      "kind": "action",
+      "label": "api",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_app": {
+      "kind": "action",
+      "label": "mobile-app",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_employee": {
+      "kind": "action",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "FLOW-003",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-003 Incident review flow (list, filter, details)"
+}

@@ -1,0 +1,232 @@
+# Agent runtime
+opencode.json
+.opencode/
+
+# Merge-assistant scratch — the conflict material handed to the agent, and its reply.
+# Written mid-merge into a repo whose index is already occupied; never part of history.
+.merge-assist/
+
+# Parallel-worktree build dirs — each is its own checkout on its own branch (see
+# workspace/git.py:create_worktree); never part of the root workspace's own tree.
+.worktrees/
+
+# Local database sandboxes. Their data directories contain generated binary files and
+# must never become application source or a merge input.
+.pg-sandbox/
+.mssql-sandbox/
+.mysql-sandbox/
+.mongo-sandbox/
+# The wave's shared authorship board. Worktrees cannot see each other's files, so two
+# specs in one wave can each create the same service class, port or schema from nothing —
+# and then merge with an EMPTY base, where git has no ancestor to reason from and the two
+# designs simply contradict. This is the one file every worktree in a wave reads and
+# appends to, so the second author extends the first instead of inventing a rival.
+# Deliberately NOT tracked: it is coordination for a build in flight, not project content,
+# and a tracked file in the shared tree would conflict in every merge the way KNOWLEDGE.md
+# already does.
+.wave/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node / npm / yarn / pnpm
+node_modules/
+.npm/
+.yarn/cache/
+.pnp.*
+
+# Next.js
+.next/
+# `out/` — Next's static export — is deliberately NOT here. It was, and because a bare
+# directory name matches at any depth it also matched `application/port/out/`, the outbound
+# side of a ports-and-adapters layout: 39 .java files on disk and in no commit, invisible to
+# the wave merge, surfacing a wave later as `cannot find symbol`. It is emitted anchored to
+# each app the project declares instead (see app_build_output_patterns), where it is exact.
+
+# Vite / webpack / esbuild / Turborepo
+dist/
+build/
+.cache/
+.turbo/
+
+# TypeScript
+*.tsbuildinfo
+*.d.ts.map
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+*.egg
+.eggs/
+
+# pytest / lint / type-check caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# Java / Maven / Gradle
+target/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+gradle-app.setting
+
+# Rust / Cargo
+# (covered by target/ above)
+
+# .NET / C#
+# (a bare "bin/" is deliberately omitted — some ecosystems, e.g. Rails, commit
+# scripts under bin/ (bin/rails, bin/setup); obj/ already covers most .NET
+# intermediate build output unambiguously)
+obj/
+# The compiled output of a .NET project lives in bin/<Configuration>/, which IS unambiguous —
+# unlike a bare bin/. A test project added by a LATER change is not covered by the per-project
+# lines an agent appends, so two parallel specs each committed their own build of it
+# (MiInventario.BLL.Tests/bin/Debug/net481/*.dll) and the wave merge died on binary conflicts.
+**/bin/Debug/
+**/bin/Release/
+*.user
+*.suo
+.vs/
+*.nupkg
+
+# Ruby / Bundler
+.bundle/
+vendor/bundle/
+
+# Coverage (generic)
+coverage/
+lcov.info
+*.lcov
+
+# Browser/E2E test output — the same family as coverage/ above, and missed for the same
+# reason nobody notices build output until it collides. Playwright names its captures after
+# the test, so two worktrees of one wave running the same suite write byte-different images
+# to the SAME path: tracked, that is an unmergeable binary conflict on every wave merge.
+# Nothing reads these from git — `test-results/` is only where captures are written and
+# copied FROM (scan_screenshots archives them and records the archive's path), and
+# `playwright-report/` is skipped by that scan outright.
+test-results/
+playwright-report/
+blob-report/
+# Verify flow captures at the workspace root. Archive copies remain versioned.
+# Anchor this rule so docs/screenshots and application assets are still tracked.
+/screenshots/
+
+# Logs
+*.log
+logs/
+
+# Temp / runtime
+tmp/
+*.tmp
+*.pid
+*.seed
+
+# Databases a generated app runs locally. Postgres and friends drop a DATA DIRECTORY next
+# to the app, and App Builder's own DB sandbox (run_command.py's four-engine support) drops
+# one per engine at the workspace root — including a live Unix domain socket. That last one
+# is not merely noise: `shutil.copytree` cannot copy a socket at all ([Errno 6]), which is
+# why `workspace_clone.copy_ignore` already skips these by file type. Committing one is
+# meaningless (it is a dead FD the moment the process exits) and a wave merge that tries to
+# reconcile two of them has nothing to reconcile.
+.pgrun/
+.pg-run/
+.pg_run/
+.pglogs/
+pgdata/
+pg-data/
+postgres-data/
+postgres_data/
+mysql-data/
+mongo-data/
+redis-data/
+*.sqlite
+*.sqlite3
+*.sqlite3-journal
+dump.rdb
+
+# Volumes a project mounts into its own tree
+.docker-data/
+docker-data/
+
+# Nothing inside a source tree is build output.
+#
+# Every build-output rule above is a bare directory name, which git matches at ANY depth —
+# so it reaches inside src/ too. `out/` is the worst of them: it is Next.js's static export
+# directory, but `out` is also the outbound-port package of a ports-and-adapters layout, so
+# `application/port/out/` and `adapters/out/**` were silently untracked. Dozens of .java
+# files existed on disk and in no commit. They never travelled between a spec's worktree and
+# Main, so each worktree grew its own copy, the wave merge had nothing to reconcile, and the
+# damage only surfaced later as "cannot find symbol" in the merged-tree build gate — far from
+# the .gitignore line that caused it. `bin/` was already left out of the .NET block for this
+# same reason; these are the rest of the family.
+#
+# Re-including the DIRECTORY is what makes this work: git refuses to descend into an excluded
+# directory, so a negation naming files inside it would do nothing, while a negation naming
+# the directory itself makes git walk it again. Hence the trailing slash on every line.
+#
+# Deliberately per-name rather than a blanket `!**/src/**/`: caches DO legitimately live
+# inside source trees (`src/pkg/__pycache__/`), and a blanket re-include would commit them.
+#
+# Source roots, not just src/: Go keeps its packages under internal/, pkg/ and cmd/, Rails
+# under app/ and lib/, and each of those can hold an `out` package exactly as src/ can. This
+# is a list of names, so it cannot be complete — a Python project laid out flat, with its
+# packages directly under the repo root, has no root name to key on. Closing that last gap
+# needs a check that looks at what git is actually hiding, not another pattern.
+!**/src/**/out/
+!**/src/**/build/
+!**/src/**/dist/
+!**/src/**/target/
+!**/src/**/obj/
+!**/internal/**/out/
+!**/pkg/**/out/
+!**/cmd/**/out/
+!**/app/**/out/
+!**/lib/**/out/
+
+# The live preview's own environment file — written per snapshot, never the project's
+preview/.env
+
+# Agent Fabric pipeline
+.env.local
+.env.*.local
+*.jks
+*.keystore
+key.properties
+*.pyc
+.npm-cache/
+.skillcache/
+*.tar
+
+# Build output of the apps declared in openspec/config.yaml. Anchored to those
+# paths on purpose: the same names loose in the tree match at any depth, which is
+# how `out/` came to hide a ports-and-adapters `port/out/` package.
+apps/mobile/out/
+apps/mobile/dist/
+apps/mobile/build/
+apps/mobile/target/
+apps/mobile/bin/
+apps/mobile/obj/
+apps/mobile/coverage/

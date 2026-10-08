@@ -1,0 +1,39 @@
+flowchart LR
+  subgraph sg_ui["UI - Jetpack Compose"]
+    cmp_signin_screen["SignInScreen - S-01 — Iniciar sesión"]
+    cmp_incidents_screen["IncidentsScreen - S-02 — Mis incidencias"]
+    cmp_new_incident_screen["NewIncidentScreen - S-03 — Nueva incidencia"]
+    cmp_detail_screen["IncidentDetailScreen - S-04 — Detalle de incidencia"]
+    cmp_nav["Navigation graph - navigation-compose typed routes"]
+    cmp_theme["Theme - design tokens (BR-036)"]
+  end
+  subgraph sg_data_layer["Data"]
+    cmp_repository_iface["IncidentRepository (interface) - Q-005"]
+    cmp_fake_repo["FakeIncidentRepository - in-memory demo"]
+    cmp_remote_repo["RetrofitIncidentRepository"]
+    cmp_dtos["kotlinx.serialization DTOs - snake_case @SerialName"]
+  end
+  subgraph sg_network["Network"]
+    cmp_retrofit["Retrofit 3.0.0 - converter-kotlinx-serialization"]
+    cmp_okhttp["OkHttp 5.5.0 - bearer-token interceptor + timeouts"]
+  end
+  subgraph sg_security["Security"]
+    cmp_keystore["Keystore-backed token storage (CONF-002, BR-006)"]
+  end
+  svc_api["api - FastAPI 0.123.10 / Python 3.10"]
+  cmp_signin_screen -->|"POST /api/auth/login"| cmp_repository_iface
+  cmp_incidents_screen -->|"GET /api/incidents, GET /api/incidents/{id}"| cmp_repository_iface
+  cmp_new_incident_screen -->|"POST /api/incidents"| cmp_repository_iface
+  cmp_detail_screen -->|"GET /api/incidents/{id}"| cmp_repository_iface
+  cmp_signin_screen --> cmp_nav
+  cmp_incidents_screen --> cmp_nav
+  cmp_new_incident_screen --> cmp_nav
+  cmp_detail_screen --> cmp_nav
+  cmp_theme -->|"styles screens (BR-036)"| cmp_incidents_screen
+  cmp_fake_repo -.->|"implements"| cmp_repository_iface
+  cmp_remote_repo -.->|"implements"| cmp_repository_iface
+  cmp_remote_repo --> cmp_retrofit
+  cmp_remote_repo -->|"maps DTOs"| cmp_dtos
+  cmp_retrofit --> cmp_okhttp
+  cmp_okhttp -->|"attaches Authorization Bearer"| cmp_keystore
+  cmp_okhttp -->|"HTTPS JSON REST"| svc_api

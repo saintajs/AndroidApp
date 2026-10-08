@@ -1,0 +1,158 @@
+{
+  "key": "sequence-flow-004",
+  "edges": {
+    "db_postgres->svc_api": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      }
+    ],
+    "svc_api->db_postgres": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      }
+    ],
+    "db_postgres->svc_api#2": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      }
+    ],
+    "svc_api->db_postgres#2": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      }
+    ],
+    "svc_api->db_postgres#3": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-025",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "svc_api->usr_support_agent": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "usr_support_agent->svc_api": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "svc_api->usr_support_agent#2": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "BR-022",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "svc_api->usr_support_agent#3": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "BR-010",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "svc_api->usr_support_agent#4": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "BR-023",
+        "section_file": "business-rules.md"
+      },
+      {
+        "artifact": "BR-024",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "svc_api->usr_support_agent#5": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "usr_support_agent->svc_api#2": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      }
+    ]
+  },
+  "nodes": {
+    "svc_api": {
+      "kind": "participant",
+      "label": "api (FastAPI)",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "db_postgres": {
+      "kind": "participant",
+      "label": "PostgreSQL",
+      "source": [
+        {
+          "artifact": "PostgreSQL 16.15",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "usr_support_agent": {
+      "kind": "participant",
+      "label": "Support agent",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-004 Support status update flow"
+}

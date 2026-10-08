@@ -1,0 +1,28 @@
+flowchart TD
+    subgraph sg_lane_app["mobile-app"]
+        n_start(["Protected call from S-02, S-03 or S-04"])
+        act_call(["Bearer call to a protected endpoint"])
+        d_401{"401 No autenticado received? (Q-008 - no refresh)"}
+        n_retry(["Keep recoverable error + retry on current screen (CONF-009)"])
+        act_clear(["Clear Keystore token - no silent retry (BR-005)"])
+        n_s01(["Route to S-01 Iniciar sesión"])
+        d_valid{"Valid credentials?"}
+        n_s02(["New 8 h JWT - restart at S-02 with fresh list"])
+        n_401login(["401 Credenciales inválidas - generic inline error (BR-002)"])
+    end
+    subgraph sg_lane_api["api"]
+        act_login(["POST /api/auth/login"])
+    end
+    subgraph sg_lane_employee["Employee"]
+        act_reenter(["Employee re-enters credentials"])
+    end
+    n_start --> act_call
+    act_call --> d_401
+    d_401 -->|"no - network error"| n_retry
+    d_401 -->|"yes"| act_clear
+    act_clear --> n_s01
+    n_s01 --> act_reenter
+    act_reenter --> act_login
+    act_login --> d_valid
+    d_valid -->|"yes"| n_s02
+    d_valid -->|"no"| n_401login

@@ -1,0 +1,13 @@
+# ktlint (standard ruleset) configuration.
+# Compose convention is PascalCase for @Composable functions — teach the standard
+# function-naming rule that, instead of disabling the rule. Applies to later screen
+# stories automatically (they copy this project's conventions).
+root = true
+
+[*.{kt,kts}]
+ktlint_function_naming_ignore_when_annotated_with = Composable
+
+# Sealed-interface Destination lives in NavGraph.kt by spec (spec.md, "Single-Activity
+# Compose host"): the filename rule's single-class name match does not apply here.
+[**/ui/navigation/NavGraph.kt]
+ktlint_standard_filename = disabled

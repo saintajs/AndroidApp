@@ -1,0 +1,241 @@
+{
+  "summary": "Completed the mock-first correction of the Android MVP backlog: US-007 and US-008 were rewritten to run exclusively on the deterministic in-memory FakeIncidentRepository (no GET/POST /api/incidents, HTTP, JWT, Keystore or INTERNET permission), the stale activity diagrams of US-006, US-009 and US-011 were replaced with their local mock flows, and US-005's previously empty security and NFR sections now explicitly define zero permissions, no external calls, no embedded credentials, demo-credentials-only, deterministic mocks, fast offline builds, reproducible tests and an installable debug APK. The parent hierarchy was aligned (FEAT-005/006/007 and FEAT-009 renamed and re-described as mock-only with real integration deferred to US-012; EPIC-002 described as the mock-first MVP; EPIC-003 reduced to debug-APK delivery with all release-signing requirements removed), US-012 remains the single non-blocking follow-up owning all real transport, and every touched story re-passed the eight-point quality audit with honest quality fields.",
+  "operations": [
+    {
+      "op": "update",
+      "level": "epic",
+      "epic_id": "EPIC-002",
+      "description": "The native Android product surface for AndersonMobile employees, delivered mock-first: a Kotlin + Jetpack Compose app (com.nexti.minisoporte, minSdk 26, Spanish, portrait) that runs the complete employee journey — sign in, report incidents, review only their own reports, sign out — entirely on in-memory fake repositories with deterministic seeded data, fake admin/admin authentication and an in-memory TokenStore. The mock MVP declares ZERO permissions, makes no network calls and requires no backend; this is the only user-facing component of MiniSoporte v1 and it renders the approved Pre-Design screens without any server dependency. Real-backend integration — Retrofit/OkHttp, DTOs, mappers, AuthInterceptor, the INTERNET permission, JWT sessions, Keystore-backed token storage and every real FastAPI endpoint — is the single deferred non-blocking follow-up story US-012, on which no mock story depends."
+    },
+    {
+      "op": "update",
+      "level": "epic",
+      "epic_id": "EPIC-003",
+      "description": "The operational backbone that makes the product reproducible and deliverable for internal testing: the idempotent demo seed provisioning demo accounts and incidents outside production, the pytest quality gate proving authentication, ownership isolation and role protection at >=90% business-logic coverage, and the mock-first Android delivery contract — an installable, unsigned debug APK (app/build/outputs/apk/debug/app-debug.apk) built from apps/mobile with ./gradlew check :app:assembleDebug and copied manually to reviewer devices. The current MVP requires no release signing: no keystore files, no key.properties, no ANDROID_KEY* environment variables and no Google Play publication — release signing and store submission remain deliberate external actions outside the mock MVP."
+    },
+    {
+      "op": "update",
+      "level": "feature",
+      "feature_id": "FEAT-005",
+      "description": "The S-01 entry screen and the client-side session machinery, implemented mock-first: required-field validation with Spanish per-field errors, the demo hint box showing admin/admin, generic failure messaging with a submit lock, and sign-out (delivered with S-02). Authentication runs exclusively against the in-memory FakeAuthService from US-005 accepting exactly admin/admin, and the fake session token lives only in the in-memory TokenStore fake — no POST /api/auth/login, no HTTP 401/422/429 handling, no JWT, no Android Keystore and no network. Real authentication (login endpoint, rate limits, expired-token recovery, Keystore-backed persistence) is deferred to US-012. - Spanish form with required-field errors (BR-001) validated client-side only in the mock MVP. - Generic error that never hints whether an account exists, even against the fake (INSTR-007, BR-002). - No 401 handling exists in the mock MVP — the expired-token recovery path arrives with US-012."
+    },
+    {
+      "op": "update",
+      "level": "feature",
+      "feature_id": "FEAT-006",
+      "description": "The S-02 home screen after sign-in, implemented mock-first on the in-memory FakeIncidentRepository seeded by US-005: the signed-in mock user's own incidents newest-first as compact cards, status filter chips with live counts, loading/empty/error+retry states, the accent FAB to create, and the Salir sign-out that clears only the in-memory mock session and returns to S-01. No GET /api/incidents, no HTTP responses, no JWT and no Android Keystore — the real REST list contract is delivered by US-012. - Owner-scoped rendering enforced by the fake repository under every filter (FUNC-003, INSTR-001). - Filter chips Todas/Pendiente/En progreso/Resuelta with live count badges computed over the seeded list (FUNC-004). - Sign-out clears the in-memory mock session token; protected screens unreachable afterwards (FUNC-002, BR-005)."
+    },
+    {
+      "op": "update",
+      "level": "feature",
+      "feature_id": "FEAT-007",
+      "description": "The two drill-down screens of the review experience, implemented mock-first against the deterministic in-memory FakeIncidentRepository: S-03 Nueva incidencia with live per-field validation, character counters and a duplicate-submission lock creating incidents in memory (always Pendiente, with the initial history entry), and S-04 Detalle de incidencia with the full incident card plus the newest-first status-history timeline and a safe no-access state for foreign identifiers. No POST /api/incidents, no GET /api/incidents/{id}, no HTTP responses, no JWT and no Android Keystore — the real API integration is deferred to US-012. - Creation always yields a Pendiente mock incident with local field-level validation and deterministic results (FUNC-005, INSTR-002). - Detail shows identifier, full data and the read-only newest-first history timeline from the seeded fake (FUNC-006, BR-021). - Missing/foreign ids render the safe no-access state — the UI never leaks another mock user's incident (BR-010)."
+    },
+    {
+      "op": "update",
+      "level": "feature",
+      "feature_id": "FEAT-009",
+      "title": "Installable Internal-Test Debug APK (No Release Signing)",
+      "description": "Completes the mock-first distribution story for internal testing: the build contract that produces the installable app/build/outputs/apk/debug/app-debug.apk from apps/mobile via ./gradlew check :app:assembleDebug with zero signing secrets, a monotonic versionCode with a human-readable versionName, and a build-only run entry. There is no release signing configuration in the mock MVP — no keystore files, no key.properties, no ANDROID_KEY* variables and no signed release APK — and no publication of any kind. - Installable app-debug.apk for manual internal distribution from a clean machine with zero secrets (CONF-010, BR-037). - check/assembleDebug remain the only required build tasks; no production secrets are ever needed. - No publication: internal testing only; store submission and release signing stay deliberate external actions (BR-038)."
+    },
+    {
+      "op": "update",
+      "level": "story",
+      "story_id": "US-005",
+      "security_considerations": [
+        "The Android manifest declares ZERO permissions: no android.permission.INTERNET, no dangerous permissions and no deep links — the mock app makes no external calls of any kind and no data leaves the device (BR-031, CONF-007); the INTERNET permission is added only by US-012.",
+        "No external calls: no network stack exists in this story's code path — no Retrofit, OkHttp, HTTP client, DTO or backend endpoint is reachable from debug builds, previews or tests; all data access resolves in memory through the fake seams.",
+        "No embedded production credentials: no secrets, passwords, API keys, keystores or key.properties exist in the source, the version catalog or the built APK — there is nothing to leak and nothing committed (BR-039 convention).",
+        "Demo credentials only for the mock build: FakeAuthService accepts exactly username admin / password admin, exists only in the mock/debug MVP, is displayed on S-01 by design, and never grants access to real data — the real authentication path is US-012.",
+        "The fake session token is held only in the in-memory TokenStore fake, never logged and never rendered in UiState (CONF-002, mock-phase BR-006); no Android Keystore code exists in this story."
+      ],
+      "non_functional_requirements": [
+        "Deterministic in-memory mocks: FakeAuthService and FakeIncidentRepository are seeded with fixed data, produce identical results on every run and resolve effectively instantly, making UI flows and tests reproducible (Q-005, BR-041).",
+        "Fast local build: ./gradlew check :app:assembleDebug completes without any backend, database, network connection or secrets and produces app/build/outputs/apk/debug/app-debug.apk.",
+        "Reproducible tests: the check suite (unit + Compose component tests, ktlint, Android Lint) runs fully offline and is pinned by the version catalog and Gradle wrapper, so results are identical on any machine (BR-037).",
+        "Installable debug APK: every check run yields an app-debug.apk installable on a portrait phone, demoable end-to-end on the mock journey with zero environment setup (CONF-010, BR-040)."
+      ],
+      "quality_score": 100,
+      "quality_gate": "passed",
+      "gate_note": "All eight checks pass after filling the previously empty security and NFR sections: the narrative keeps actor/trigger/outcome; the functional flow covers the happy path plus the simulated failure/retry behavior; design traceability explains the absent screens/apis/entities/flows; the technical analysis carries the full contract for every traced artifact; the rules are story-specific and the new security considerations (zero permissions, no external calls, no embedded credentials, mock-only demo credentials) and NFRs (deterministic mocks, fast offline build, reproducible tests, installable debug APK) are explicit and testable; the acceptance criteria are sufficient and testable; related claim ids exist in traceability; and the empty dependency list is valid for the first mobile story."
+    },
+    {
+      "op": "update",
+      "level": "story",
+      "story_id": "US-006",
+      "activity_diagram": "@startuml\nstart\n:Employee opens app - S-01 Iniciar sesión;\nif (Both fields filled? (BR-001)) then (no)\n  :Spanish per-field required errors;\n  stop\nelse (yes)\nendif\n:Tap primary button - locked while the fake authentication resolves (BR-003);\n:FakeAuthService checks the credential pair in memory - no network request (BR-041);\nif (Credentials == admin/admin?) then (yes)\n  :Store fake session token in the in-memory TokenStore fake (mock-phase BR-006);\n  :Navigate to S-02 Mis incidencias;\n  stop\nelse (no)\n  :Generic inline error - no account-existence hint (BR-002, INSTR-007);\n  :Form state preserved;\n  stop\nendif\n@enduml",
+      "quality_score": 100,
+      "quality_gate": "passed",
+      "gate_note": "All eight checks pass after replacing the stale diagram: the activity diagram now shows the local mock sign-in flow only (FakeAuthService + in-memory TokenStore, admin/admin, generic failure) with no POST /api/auth/login, no 401/422/429 branches and no Keystore step, agreeing with the narrative, functional flow, rich fields and business rules; the remaining checks (actor/trigger/outcome, wrong-credential alternate path, design traceability with explained absent APIs, technical contract, story-specific rules/security/NFRs, testable criteria, real claim ids, and the single US-005 dependency in valid order) were re-verified and hold."
+    },
+    {
+      "op": "update",
+      "level": "story",
+      "story_id": "US-007",
+      "title": "S-02 Mis incidencias: owned list with status filter chips, states and sign-out",
+      "description": "Implements the S-02 home screen exclusively on the mock foundation: the signed-in mock user's own seeded incidents newest-first as compact cards (title, category pill, priority pill, status badge, creation date), status filter chips with live counts, loading/empty/error+retry states, the accent FAB to S-03, and the Salir sign-out that clears only the in-memory mock session. All data comes from the deterministic in-memory FakeIncidentRepository — no GET /api/incidents, no HTTP responses, no JWT, no Android Keystore and no INTERNET permission; the real REST list contract is delivered by US-012.",
+      "narrative": "As an AndersonMobile employee testing the mock MVP, I see only my own seeded incidents on S-02 — newest first as compact cards with title, category, priority, status badge and creation date — and I can filter them with status chips showing live counts, so that I can quickly find the report I care about; from here I can also open the create form via the FAB and sign out via Salir, which clears the in-memory mock session so no protected screen stays reachable. Trigger: navigation to S-02 after mock sign-in, screen re-entry, chip tap, card tap, or Salir tap. Every read resolves against the deterministic in-memory FakeIncidentRepository from US-005 — no network request is ever made; the real GET /api/incidents contract and all transport behavior are deferred to US-012.",
+      "functional_flow": "1. On S-02 entry the ViewModel loads the incident list through the repository seam exclusively from the in-memory FakeIncidentRepository (no GET /api/incidents, no HTTP) — owner-scoped to the signed-in mock user, newest first, no pagination. 2. The list renders as cards (title + status badge, category pill, priority pill, 'Creada el <date>'); loading, empty ('Sin incidencias') and error+retry states cover every load outcome; the retry path is exercised via the fake's simulated failure capability (CONF-009 convention established by US-005), not by network errors. 3. Tapping a filter chip (Todas/Pendiente/En progreso/Resuelta) re-queries the fake with the status filter and updates every chip's live count badge; filtering never exposes another mock user's incidents. 4. Tapping a card navigates to S-04. 5. Tapping the FAB opens S-03. 6. Tapping 'Salir' clears the in-memory mock session (deletes the fake token from the in-memory TokenStore fake — no server endpoint, no Keystore, mock-phase BR-005), shows the confirmation toast 'Sesión cerrada' and routes to S-01; no protected screen remains accessible afterward (BR-005). Out of scope (US-012): the real GET /api/incidents contract, HTTP responses, expired-token recovery and any network behavior — no such logic exists in the mock MVP.",
+      "acceptance_criteria": [
+        "CA-01: Given the signed-in mock user owns 3 seeded incidents (mixed statuses), When S-02 loads from the in-memory FakeIncidentRepository, Then exactly those 3 cards render newest-first, each with title, category pill, priority pill, status badge and 'Creada el <date>' (BR-019, BR-009).",
+        "CA-02: Given the load is in flight, When S-02 is entered, Then the loading state renders; given the owned list for the active filter is empty, Then the 'Sin incidencias' empty state renders (FUNC-003).",
+        "CA-03: Given the fake's simulated failure mode (CONF-009 convention from US-005), When the load fails, Then the error state renders with a retry button and tapping retry reloads from the fake without crashing — no network error path exists in this story.",
+        "CA-04: Given the chips Todas/Pendiente/En progreso/Resuelta, When a chip is tapped, Then the list narrows to that status, the active chip is filled dark green, and every chip's live count badge updates from the seeded list (FUNC-004, BR-017).",
+        "CA-05: Given seeded incidents for more than one mock user, When the signed-in mock user filters or reloads, Then no card, count, or detail path ever exposes another mock user's data (BR-009, INSTR-001).",
+        "CA-06: Given 'Salir' is tapped, When sign-out completes, Then the fake session token is deleted from the in-memory TokenStore fake (nothing readable remains), the toast 'Sesión cerrada' shows, and the app routes to S-01 with no protected screen reachable — no Keystore, no JWT and no network call involved (FUNC-002, mock-phase BR-005).",
+        "CA-07: Given a status badge, When rendered, Then it always shows its Spanish label together with its paired background color — never color alone (INSTR-012, BR-036).",
+        "CA-08: Given the test suites, When ./gradlew check runs, Then the list/filter ViewModel state-machine tests over the fake and s02_* Compose component tests pass fully offline, and journeys 2 and 5 of the five mandatory mock journeys hold.",
+        "CA-09: Given the story scope, When inspected, Then no real API contract logic exists — no GET /api/incidents, no HTTP responses, no JWT, no Android Keystore, no INTERNET permission — these are explicitly deferred to US-012, and this story depends only on US-005 and US-006."
+      ],
+      "business_rules": [
+        "BR-005 (mock-phase) — Signing out clears the in-memory mock session (the fake token is deleted from the in-memory TokenStore fake), and no protected screen remains accessible afterward; no server endpoint, JWT or Keystore exists in the mock MVP (FUNC-002, Q-008).",
+        "BR-009 — The list shows only incidents the signed-in mock user owns; the fake enforces owner isolation under every filter (INSTR-001).",
+        "BR-017 — Statuses limited to the fixed set pending/in_progress/resolved; filter options are All, Pending, In progress, Resolved.",
+        "BR-019 — Own incidents, newest first, each card showing title, category, priority, status, and creation date.",
+        "BR-020 — No pagination in v1: all owned seeded incidents matching the filter are rendered.",
+        "BR-036 — Statuses differentiated with text and color — never color alone; palette/contrast/touch-target baseline (INSTR-012).",
+        "BR-041 — Mock-first: the only data source for S-02 is the deterministic in-memory FakeIncidentRepository; no network, backend or HTTP transport is required or present."
+      ],
+      "dependencies": ["US-005", "US-006"],
+      "security_considerations": [
+        "Sign-out is a local in-memory operation only: it deletes the fake session token from the in-memory TokenStore fake and involves no server, no JWT and no Keystore (mock-phase BR-005).",
+        "The UI can only render owner-scoped fake data; the fake scopes every read to the signed-in mock user and filtering cannot widen scope (INSTR-001, BR-009).",
+        "No network calls and no INTERNET permission in this story — mock data never leaves the device and nothing can be intercepted in transit.",
+        "Token material (the fake session token) is never logged and never rendered in UiState (CONF-002, mock-phase BR-006)."
+      ],
+      "non_functional_requirements": [
+        "Deterministic in-memory reads resolve effectively instantly (<2 s budget trivially met) and produce identical results on every run; list rendering in LazyColumn with stable keys for smooth scrolling.",
+        "Loading/empty/error states on the screen at all times; retry always available via the fake's simulated failure convention (CONF-009).",
+        "48dp touch targets; pill chips 999px radius; light theme tokens only (BR-036); no backend or network connectivity required."
+      ],
+      "design_traceability": {
+        "components": ["mobile-app"],
+        "screens": ["S-02 — Mis incidencias"],
+        "apis": [],
+        "entities": [],
+        "flows": ["Incident review flow (list, filter, details)", "Session lifecycle (sign in to sign out)"],
+        "notes": "Screen story for the list half of the review flow plus sign-out from the session lifecycle flow, rendered against the seeded in-memory FakeIncidentRepository. APIs are [] because the real GET /api/incidents contract is realized by US-012 — the mock story only represents the flow against the fake. Entities [] because the client renders fake data without persisting it."
+      },
+      "technical_analysis": {
+        "endpoints": [],
+        "entities": [],
+        "screens": [
+          "S-02 — Mis incidencias (mockup: docs/design/screenshots/pre_design_mobile.png): dark app bar (#1E3A2A) with the brand mark, the title 'Mis incidencias' and the signed-in mock user's email as subtitle, plus a 'Salir' (sign out) app-bar button (rgba(255,255,255,0.12) background, rgba(255,255,255,0.25) border, white text). Below the bar, on #F5F7F5 with 16px content padding: a horizontally scrollable row of filter chips — Todas / Pendiente / En progreso / Resuelta — each with a live count badge (active chip filled #1E3A2A with white text, inactive chips white with #DDE4DF border, 999px pills); incident cards (surface #FFFFFF, 1px #DDE4DF border, 8px radius) with the incident title (heading-md, weight 700) and status badge on the top row, then a meta row with a category pill, a priority pill (Alta #C4463E/#A32E27, Media #B98A1E/#7A5B10, Baja #6B8F7A/#446B54) and 'Creada el <date>' caption text; tapping a card opens S-04; bottom navigation bar (white surface, 1px top border #DDE4DF) with the list item and a centered accent FAB (52dp #EFC64E circle, '+' glyph #1E3A2A, 3px #F5F7F5 border) that opens S-03; empty state: dashed-border box with an icon, 'Sin incidencias' title and hint text; error state: the same box plus a retry button (white bg, #1E3A2A text and border). Tokens: primary #1E3A2A, accent #EFC64E, background #F5F7F5, surface #FFFFFF, border #DDE4DF, text-primary #1C2B22, text-muted #5C6B62, status badge pairs (Pendiente #FBF1D4/#7A5B10, En progreso #E1EAF6/#2A4E79, Resuelta #DFEFE3/#1E5B36), typography per the design system (heading-lg 18px, heading-md 15px, caption 12.5px, badge 12px, chip 13.5px, button 15px)."
+        ],
+        "conventions": [
+          "Feature package ui/incidents: IncidentListScreen.kt, StatusFilterChips.kt, IncidentListViewModel.kt; shared ui/components/IncidentCard.kt, StatusBadge.kt (text + color, never color alone — INSTR-012), ErrorRetryState.kt.",
+          "Screens compose Scaffold with a top app bar and (on S-02) the bottom navigation bar; list content in LazyColumn with stable key = { it.id } items; stateless composables with UiState + event lambdas; state hoisting mandatory.",
+          "IncidentListUiState covers loading/empty/error+retry/content; exposed via MutableStateFlow + asStateFlow(); collected with collectAsStateWithLifecycle(); data loads in LaunchedEffect(key); one-shot events (toast 'Sesión cerrada', navigation) emitted as consumed events.",
+          "All data access goes through the IncidentRepository seam wired to the in-memory FakeIncidentRepository from US-005 with deterministic seeded data; reads are suspending and resolved from memory — no Retrofit, OkHttp, DTO, JWT or network code is reachable from this screen; the fake's simulated-failure capability exercises the error+retry state (CONF-009 convention established by US-005), never a network error.",
+          "Sign-out deletes the fake session token from the in-memory TokenStore fake only — no Keystore, no server call — and emits the navigation event to S-01.",
+          "Test tags s02_* (e.g. s02_filter_chip_pendiente); 48dp minimum touch targets; chips/badges pill-shaped (50% radius)."
+        ],
+        "test_strategy": [
+          "ViewModel unit tests over the fake: loading -> content for the seeded owned list, empty state for a filter with no matches, chip counts derived client-side from the seeded array, error+retry driven by the fake's simulated failure.",
+          "Owner-scoping test: the fake returns only incidents owned by the signed-in mock user under every filter.",
+          "Sign-out test: Salir clears the in-memory TokenStore fake, emits the toast event and routes to S-01; no protected screen reachable afterward.",
+          "Compose component tests with s02_* tags: cards render title/category/priority/status/date, chips filter and show live counts, status badge text + color.",
+          "./gradlew check passes with no backend, no network, no secrets."
+        ],
+        "flow_slice": "Incident review flow (mock-first) — Step 1: On S-02 entry the ViewModel loads the list through the repository seam exclusively from the in-memory FakeIncidentRepository; the fake returns only incidents owned by the signed-in mock user (INSTR-001, BR-009), newest-first with no pagination (BR-020); list items omit description. S-02 renders each card with title, category, priority, status badge, and 'Creada el <date>', plus loading / empty ('Sin incidencias') / error+retry states. Step 2: The employee taps a filter chip (Todas / Pendiente / En progreso / Resuelta); the ViewModel re-queries the fake with the status filter (FUNC-004) and count badges update live. Outcome & errors: an empty result set shows the 'Sin incidencias' state (normal edge case); the error+retry state is exercised via the fake's simulated failure (CONF-009) — no network failure path exists in the mock MVP. Session lifecycle — Step 3: The employee taps 'Salir' on S-02; sign-out clears the fake session token from the in-memory TokenStore fake only (FUNC-002, mock-phase BR-005), shows the confirmation toast 'Sesión cerrada', and returns to S-01 with no protected screen reachable afterward. No JWT, no Keystore and no HTTP request are involved anywhere; the real transport behavior is deferred to US-012.",
+        "notes": "The FAB's navigation to S-03 is wired here; the create screen itself is US-008, and the card -> S-04 drill-down is completed by US-009. Chip counts derive from the currently loaded owned list (client-side counts over the fake's array, refreshed on load)."
+      },
+      "related_claim_ids": ["FUNC-002", "FUNC-003", "FUNC-004", "INSTR-001", "INSTR-012", "CONF-009", "BR-005", "BR-009", "BR-017", "BR-019", "BR-020", "BR-036"],
+      "quality_score": 100,
+      "quality_gate": "passed",
+      "gate_note": "All eight checks pass after the mock-first rewrite: the narrative has actor (employee/tester), trigger (navigation/chip/card/FAB/Salir) and outcome (owned newest-first list or sign-out to S-01); the functional flow covers the happy path plus the empty and simulated-failure alternates while explicitly scoping the real endpoint and 401 handling to US-012; design traceability covers components, the S-02 screen and both flows and explains why apis/entities are empty; the technical analysis carries the full screen spec, conventions and test strategy for the traced artifacts with zero endpoint contracts; rules, security and NFRs are story-specific to the fake-backed mock path with no HTTP/JWT/Keystore residue; the acceptance criteria are sufficient and testable including the no-real-API scope guard (CA-09); related claim ids exist in traceability; and dependencies (US-005, US-006) are real stories in valid build order."
+    },
+    {
+      "op": "update",
+      "level": "story",
+      "story_id": "US-008",
+      "title": "S-03 Nueva incidencia: validated creation form with counters and duplicate-submission lock",
+      "description": "Implements the S-03 creation screen exclusively in memory through the FakeIncidentRepository from US-005: the employee fills Título, Categoría, Prioridad and Descripción with live per-field validation and character counters, and a valid submit creates a deterministic mock incident that always starts in Pendiente with its initial history entry, returning to S-02 with the new card first. No POST /api/incidents, no HTTP 401/422, no network errors, no JWT and no Android Keystore — the real API implementation is delivered by US-012.",
+      "narrative": "As an AndersonMobile employee testing the mock MVP, I can report a new incident on S-03 by filling Título, Categoría, Prioridad and Descripción with live validation and character counters, so that my report is accepted complete and correct (always starting in Pendiente) and I return to my list seeing it first; invalid input shows Spanish errors next to each field and never creates a partial mock incident. Trigger: tapping the accent FAB on S-02. Creation happens exclusively in the deterministic in-memory FakeIncidentRepository — no POST /api/incidents request is ever made; the real API contract and transport behavior are deferred to US-012.",
+      "functional_flow": "1. The employee fills Título (live 'n / 100' counter), Categoría choice group (Sistemas/Equipos/Acceso/Otro), Prioridad choice group (Baja/Media/Alta) and Descripción (live 'n / 1000' counter); a hint states the incident will be created in 'Pendiente' state (INSTR-002). 2. Live per-field validation enforces the rules locally (title 5–100 chars, description 10–1000 chars, category and priority required — BR-013..016); Spanish errors render next to each field (INSTR-011) and submission is blocked. 3. Tapping 'Guardar incidencia' locks the button with the label 'Guardando…' (duplicate-submission lock) and creates the incident exclusively in the in-memory FakeIncidentRepository — no POST /api/incidents, no HTTP; the fake always sets status Pendiente and records the initial history entry (previous_status null), ignoring any status/owner input (INSTR-002, BR-011). 4. On success the app returns to S-02 with a confirmation toast and the new 'Pendiente' incident appears first (newest-first, BR-019). Out of scope (US-012): the real POST /api/incidents contract, HTTP 401/422 handling, server-side authoritative validation and network failure/retry behavior — no network request is ever made in the mock MVP.",
+      "acceptance_criteria": [
+        "CA-01: Given the form, When the employee types in Título or Descripción, Then live 'n / 100' and 'n / 1000' counters update with each keystroke.",
+        "CA-02: Given a title of 4 or 101 chars, or a description of 9 or 1001 chars, When local validation runs, Then Spanish field-level errors render next to the offending fields, submit is blocked, and nothing is created in the fake (BR-013, BR-014).",
+        "CA-03: Given no category or no priority selected, When the employee taps Guardar incidencia, Then the required-choice errors render and nothing is submitted (BR-015, BR-016).",
+        "CA-04: Given a valid form, When Guardar incidencia is tapped, Then the button locks with the label 'Guardando…' and repeated taps produce exactly one creation in the in-memory FakeIncidentRepository (duplicate-submission lock).",
+        "CA-05: Given a valid submission, When the in-memory creation resolves, Then the fake stores exactly one mock incident with status Pendiente (created_at == updated_at and an initial history entry with previous_status null), the app navigates back to S-02 with a confirmation toast, and the new 'Pendiente' card appears first in the list (BR-019, INSTR-002).",
+        "CA-06: Given deterministic repeated runs of the same valid submission against a freshly seeded fake, When creation executes, Then the mock result is identical every time — the created incident and its initial history entry are fully deterministic.",
+        "CA-07: Given the test suites, When ./gradlew check runs, Then the ViewModel validation tests and s03_* Compose tests pass fully offline, and journey 3 of the five mandatory mock journeys holds.",
+        "CA-08: Given the story scope, When inspected, Then no real API contract logic exists — no POST /api/incidents, no HTTP 401/422 handling, no network error path, no JWT, no Android Keystore — these are explicitly deferred to US-012, and this story depends only on US-005 and US-007."
+      ],
+      "business_rules": [
+        "BR-011 — Every incident created starts in Pending status; the form hints 'Pendiente', never submits a status, and the fake always sets it (INSTR-002).",
+        "BR-013 — Title required, 5–100 characters, validated live in the mock MVP.",
+        "BR-014 — Description required, 10–1,000 characters, with live counter; validated locally in the mock MVP (server-authoritative validation arrives with US-012).",
+        "BR-015 — Category in the fixed set Systems/Equipment/Access/Other (choice group).",
+        "BR-016 — Priority in the fixed set Low/Medium/High (choice group).",
+        "BR-018 — Local field-level validation with Spanish errors; a failed validation never creates the incident in the fake (INSTR-011); the client+server validation pair is completed by US-012.",
+        "BR-041 — Mock-first: creation runs exclusively against the deterministic in-memory FakeIncidentRepository; no network or backend is required or present.",
+        "Duplicate-submission lock: the submit button is disabled with label 'Guardando…' while the in-memory creation resolves (draft behavior, FUNC-005)."
+      ],
+      "dependencies": ["US-005", "US-007"],
+      "security_considerations": [
+        "The client never sends status/owner fields; the fake ignores them and always sets Pendiente and the signed-in mock owner — the mass-assignment backstop on the real server arrives with US-012 (INSTR-002).",
+        "Input validation is enforced locally for immediate feedback; no user input leaves the device in the mock MVP (INSTR-011, BR-018).",
+        "No network calls, no INTERNET permission and no credential material in this story — nothing is transmitted, and no token material is kept in UiState (CONF-002, mock-phase BR-006)."
+      ],
+      "non_functional_requirements": [
+        "Deterministic in-memory creation: identical input on a freshly seeded fake yields an identical mock incident and history entry, keeping tests and demos reproducible (Q-005, BR-041).",
+        "48dp targets, live counters within the 8dp grid, theme tokens only (BR-036); no backend or network connectivity required.",
+        "Validation is debounce-free and unit-testable in the ViewModel without Compose; the fake creation resolves effectively instantly so the 'Guardando…' lock is exercisable in tests."
+      ],
+      "design_traceability": {
+        "components": ["mobile-app"],
+        "screens": ["S-03 — Nueva incidencia"],
+        "apis": [],
+        "entities": [],
+        "flows": ["Incident creation flow"],
+        "notes": "Mobile half of the creation flow rendered against the in-memory fake: APIs are [] because the real POST /api/incidents contract is realized by US-012 — the mock story creates incidents deterministically in memory only. Entities [] — the fake holds the created incident in memory for the session; the client persists nothing locally."
+      },
+      "technical_analysis": {
+        "endpoints": [],
+        "entities": [],
+        "screens": [
+          "S-03 — Nueva incidencia (mockup: docs/design/screenshots/pre_design_mobile.png): dark app bar (#1E3A2A) with a back button ('Volver') and the title 'Nueva incidencia'. Below, a form card (surface #FFFFFF, 1px #DDE4DF border, 8px radius) on #F5F7F5 with 16px padding containing: 'Título' text input with a live 'n / 100' character counter (caption style, #5C6B62) and field-level errors in #B3261E; 'Categoría' choice group (Sistemas / Equipos / Acceso / Otro) — 8px-radius options, selected option filled #1E3A2A with white text; 'Prioridad' choice group (Baja / Media / Alta) with the same selected style; 'Descripción' textarea with a live 'n / 1000' character counter; a hint noting the incident will be created in 'Pendiente' state (status-pending-bg #FBF1D4 / status-pending-fg #7A5B10); the 'Guardar incidencia' primary button (#1E3A2A, full width, min-height 48px) with duplicate-submission lock — the label switches to 'Guardando…' while saving. Tokens: text-primary #1C2B22, text-muted #5C6B62, danger/error #B3261E, danger-soft #FBEAE9, 8px radius, 8dp grid, label 13px weight 600, caption 12.5px, button 15px weight 700."
+        ],
+        "conventions": [
+          "Feature package ui/newincident: NewIncidentScreen.kt with NewIncidentViewModel.kt; validation logic (title 5–100, description 10–1000, required category/priority) lives in the ViewModel, unit-testable without Compose; the UI only renders the resulting field-error state and char counters.",
+          "rememberSaveable only for trivial UI state (form field text), never for session/data state (that lives in the ViewModel); stateless composables with UiState + event lambdas; one-shot events (navigation on success, toast) emitted as consumed events.",
+          "Choice-group options and buttons are theme-token styled; no hard-coded hex/DP; 48dp minimum touch targets; per-field error semantics announced via liveRegion; test tags s03_* (e.g. s03_title_input, s03_submit).",
+          "Duplicate-submission lock in the ViewModel (submitting flag) with the button label switching to 'Guardando…'; submission goes through the IncidentRepository seam wired to the deterministic in-memory FakeIncidentRepository — no Retrofit, OkHttp, DTO, JWT or network code is reachable from this screen.",
+          "The client never sends status/owner fields; the fake always sets status Pendiente, a fresh mock id, created_at == updated_at and the initial history entry (previous_status null), mirroring the future server behavior so the US-012 swap cannot change the UI contract (INSTR-002, BR-011)."
+        ],
+        "test_strategy": [
+          "ViewModel unit tests: title 5–100 and description 10–1000 boundary validation with counters, required category/priority, duplicate-submission lock producing exactly one fake creation.",
+          "Fake behavior tests: a valid submit inserts exactly one Pendiente mock incident with created_at == updated_at and an initial history entry (previous_status null); the new incident appears first in the owned list (newest-first); repeated identical submissions on a freshly seeded fake are deterministic.",
+          "Compose component tests with s03_* tags: counters, field-level Spanish errors, 'Guardando…' lock, navigation back to S-02 with the new Pendiente card first.",
+          "./gradlew check passes with no backend, no network, no secrets."
+        ],
+        "flow_slice": "Incident creation flow (mock-first) — Trigger: On S-02, the employee taps the accent FAB ('+') opening S-03. Step 1: fill 'Título' (live 'n / 100' counter), 'Categoría' choice group, 'Prioridad' choice group, 'Descripción' (live 'n / 1000' counter); live per-field validation enforces the title 5–100 and description 10–1000 rules and required choices locally (BR-013..016); a hint states the incident will be created in 'Pendiente' state (INSTR-002). Step 2: tap 'Guardar incidencia'; the button locks with the label 'Guardando…' (duplicate-submission lock). Step 3: the ViewModel submits through the repository seam to the deterministic in-memory FakeIncidentRepository — no HTTP request is made; the fake always assigns status Pendiente, a fresh mock id, created_at == updated_at and the initial history entry (previous_status null), and never accepts status/owner input (INSTR-002, BR-011). Step 4: on success the app returns to S-02, shows a confirmation, and the new 'Pendiente' incident appears at the top of the list (BR-019). Outcome & errors: invalid fields block submission with Spanish per-field errors and nothing is created (INSTR-011, BR-018) — validation is entirely local, so no 401/422 path exists in the mock MVP. The real POST /api/incidents contract, server-side validation and transport behavior are deferred to US-012.",
+        "notes": "The FakeIncidentRepository simulates the same contract in memory, including the initial history entry (previous_status null), so the flow demos without a backend (Q-005, deterministic results). The client never sends status/owner fields — creation is always Pendiente (INSTR-002, BR-011). The server-authoritative validation and mass-assignment backstop arrive with US-012."
+      },
+      "related_claim_ids": ["FUNC-005", "INSTR-002", "INSTR-011", "BR-011", "BR-013", "BR-014", "BR-015", "BR-016", "BR-018"],
+      "quality_score": 100,
+      "quality_gate": "passed",
+      "gate_note": "All eight checks pass after the mock-first rewrite: the narrative has actor (employee/tester), trigger (FAB tap) and outcome (deterministic Pendiente mock incident first in the list, or blocked submission with field errors); the functional flow covers the happy path plus the invalid-input alternate while explicitly scoping the real endpoint, HTTP and network behavior to US-012; design traceability covers components, the S-03 screen and the creation flow and explains why apis/entities are empty; the technical analysis carries the full screen spec, conventions and test strategy with zero endpoint contracts; rules, security and NFRs are story-specific to the in-memory creation path; the acceptance criteria are sufficient and testable including the deterministic-result and scope-guard checks; related claim ids exist in traceability; and dependencies (US-005, US-007) are real stories in valid build order."
+    },
+    {
+      "op": "update",
+      "level": "story",
+      "story_id": "US-009",
+      "activity_diagram": "@startuml\nstart\n:Tap incident card on S-02 -> navigate S-04 with id;\n:Load detail from in-memory FakeIncidentRepository - owner-scoped, no network (BR-041);\nif (Owned seeded id?) then (yes)\n  :Render detail card (ID, title + status badge, description, Categoría/Prioridad/Estado/Fecha);\n  :Reverse ascending history -> \"Historial de estados\" newest-first, \"Creación — Pendiente\" initial entry, latest highlighted;\n  :\"Mis incidencias\" back to S-02;\n  stop\nelse (no - missing or foreign, indistinguishable)\n  :Safe no-access state \"Incidencia no disponible\" + hint (BR-010);\n  stop\nendif\n@enduml",
+      "quality_score": 100,
+      "quality_gate": "passed",
+      "gate_note": "All eight checks pass after replacing the stale diagram: the activity diagram now shows the local mock flow only (in-memory FakeIncidentRepository load, newest-first reversed history, identical safe no-access state for missing/foreign ids) with no GET /api/incidents/{id}, no network-error/401/404 branches and no Keystore step, agreeing with the narrative, functional flow and rich fields; the remaining checks (actor/trigger/outcome, both no-access alternates, design traceability with explained absent APIs/entities, technical contract, story-specific rules/security/NFRs, testable criteria including the ordering assertion, real claim ids, and dependencies US-005/US-007 in valid order) were re-verified and hold."
+    },
+    {
+      "op": "update",
+      "level": "story",
+      "story_id": "US-011",
+      "activity_diagram": "@startuml\nstart\n:Operator requests ./gradlew check :app:assembleDebug from apps/mobile;\n:check suite runs (unit + Compose tests, ktlint, lint) - zero secrets required;\nif (check suite passes?) then (no)\n  :Build fails with the standard Gradle report - no signing configuration exists to fail;\n  stop\nelse (yes)\nendif\n:app/build/outputs/apk/debug/app-debug.apk produced - no keystore, no key.properties, no ANDROID_KEY* variables (BR-037);\n:Operator installs the APK on a portrait phone;\n:Reviewer demos the mock journey offline: admin/admin sign-in -> seeded list/filter -> create -> detail -> sign-out (BR-041);\n:Local artifact only - no upload, no publication (BR-038);\nstop\n@enduml",
+      "quality_score": 100,
+      "quality_gate": "passed",
+      "gate_note": "All eight checks pass after replacing the stale diagram: the activity diagram now shows the debug APK build and installation flow only (check :app:assembleDebug, zero secrets, installable app-debug.apk, offline mock demo, no upload) with no assembleRelease, keystore or ANDROID_KEY* branches, agreeing with the narrative, functional flow and rich fields; the remaining checks (actor/trigger/outcome, failing-check error behavior, design traceability explaining the build-only scope with absent screens/apis/entities/flows, technical build contract, story-specific rules/security/NFRs, testable criteria including the no-US-012 and no-publication assertions, real claim ids, and dependencies limited to the mock flow stories US-005..US-009 in valid order) were re-verified and hold."
+    }
+  ]
+}

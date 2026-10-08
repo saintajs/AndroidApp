@@ -1,0 +1,86 @@
+{
+  "key": "architecture-containers",
+  "edges": {
+    "svc_api->db_postgres": [
+      {
+        "artifact": "PostgreSQL 16.15",
+        "section_file": "components.md"
+      }
+    ],
+    "svc_api->db_postgres#2": [
+      {
+        "artifact": "PostgreSQL 16.15",
+        "section_file": "components.md"
+      }
+    ],
+    "svc_mobile_app->svc_api": [
+      {
+        "artifact": "Android app \u2194 REST API (first-party, internal)",
+        "section_file": "external-integrations.md"
+      }
+    ]
+  },
+  "nodes": {
+    "svc_api": {
+      "kind": "service",
+      "label": "api - FastAPI 0.123.10 / Python 3.10 - uvicorn 0.54.0",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_backend": {
+      "kind": "component",
+      "label": "Backend",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "db_postgres": {
+      "kind": "database",
+      "label": "PostgreSQL 16.15",
+      "source": [
+        {
+          "artifact": "PostgreSQL 16.15",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_database": {
+      "kind": "component",
+      "label": "Database",
+      "source": [
+        {
+          "artifact": "PostgreSQL 16.15",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_frontend": {
+      "kind": "component",
+      "label": "Frontend",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "svc_mobile_app": {
+      "kind": "service",
+      "label": "mobile-app - Kotlin 2.3.21 + Jetpack Compose - com.nexti.minisoporte, minSdk 26",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    }
+  },
+  "title": "Containers - mobile-app, api, PostgreSQL 16.15"
+}

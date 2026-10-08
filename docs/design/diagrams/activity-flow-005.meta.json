@@ -1,0 +1,218 @@
+{
+  "key": "activity-flow-005",
+  "edges": {
+    "d_exit->n_401": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_exit->n_403": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_use->d_exit": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_exit->act_use": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_store->act_use": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      }
+    ],
+    "n_start->act_login": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "d_exit->act_signout": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-005",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "act_login->act_store": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-006",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "act_signout->n_signedout": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-005",
+        "section_file": "business-rules.md"
+      }
+    ]
+  },
+  "nodes": {
+    "n_401": {
+      "kind": "action",
+      "label": "401 - No autenticado - expired-token recovery flow",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_403": {
+      "kind": "action",
+      "label": "403 - Cuenta inactiva - clear token - route S-01",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "d_exit": {
+      "kind": "decision",
+      "label": "Employee taps Salir, token expires, or account deactivated?",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_use": {
+      "kind": "action",
+      "label": "Authenticated use - Bearer header on every protected call",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_start": {
+      "kind": "action",
+      "label": "Sign in on S-01",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_login": {
+      "kind": "action",
+      "label": "POST /api/auth/login - JWT HS256 exp issued + 28800 s (CONF-001, BR-004)",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "POST /api/auth/login",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-004",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_store": {
+      "kind": "action",
+      "label": "Store token Keystore-backed (BR-006)",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-006",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_signout": {
+      "kind": "action",
+      "label": "Client deletes Keystore token - NO server endpoint (Q-008)",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-005",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_signedout": {
+      "kind": "action",
+      "label": "Confirmation toast - route S-01 - protected screens unreachable",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-005",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "sg_lane_api": {
+      "kind": "action",
+      "label": "api",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_app": {
+      "kind": "action",
+      "label": "mobile-app",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_employee": {
+      "kind": "action",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "FLOW-005",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-005 Session lifecycle (sign in to sign out)"
+}

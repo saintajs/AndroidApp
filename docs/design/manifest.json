@@ -1,0 +1,38 @@
+{
+  "assessment": "The project is a greenfield mobile_backend system: a native Android (Kotlin + Jetpack Compose) client for employees to report and track their own incidents, a FastAPI 0.123.10 / Python 3.10 REST API with JWT auth, owner isolation, and role-protected status updates, and a PostgreSQL 16.15 database with three tables (User, Incident, IncidentHistory). All three layers are mandated by the wizard target plan and confirmed by the extractions (CONF-008, CONF-011, mobile_delivery contract), so nothing was added beyond the wizard. CI/CD is absent: the project is internal-testing only, with local builds (./gradlew check :app:assembleDebug) and no pipeline requested. Cloud is absent: AGENTS.md explicitly forbids cloud infrastructure or external resources, and clarifications resolve limiter state as in-process memory rather than a managed service.",
+  "components": {
+    "frontend": {
+      "present": true,
+      "count": 1,
+      "items": [
+        {
+          "name": "mobile-app",
+          "description": "Native Android app (Kotlin + Jetpack Compose, application id com.nexti.minisoporte, minSdk 26 per clarification Q-006) for employees: Spanish-language phone UI in portrait, sign in (S-01), My incidents list with status filter (S-02), New incident form (S-03), incident details with status-history timeline (S-04); Retrofit 3.0.0 + OkHttp 5.x + kotlinx.serialization (Q-012), Android Keystore-backed token storage (CONF-002), online only, no permissions. Located at apps/mobile.",
+          "repo_scope": "All project"
+        }
+      ]
+    },
+    "backend": {
+      "present": true,
+      "count": 1,
+      "items": [
+        {
+          "name": "api",
+          "description": "FastAPI 0.123.10 / Python 3.10 layered REST API (CONF-011): public POST /api/auth/login with JWT HS256 8-hour tokens and in-memory rate limiting (Q-002, Q-004, Q-009, Q-011), authenticated GET /api/me, employee GET/POST /api/incidents (no pagination per Q-007), owner-restricted GET /api/incidents/{id} with status history, support-only PATCH /api/incidents/{id}/status with linear transition validation, public GET /health; SQLAlchemy 2.0.x ORM + Alembic migrations (Q-003), bcrypt password hashing (Q-010), idempotent dev seed (FUNC-009), pytest at >=90% business-logic coverage (INSTR-013).",
+          "repo_scope": "All project"
+        }
+      ]
+    },
+    "database": {
+      "present": true,
+      "engines": ["PostgreSQL"],
+      "tables_estimate": 3
+    },
+    "cicd": {
+      "present": false
+    },
+    "cloud": {
+      "present": false
+    }
+  }
+}

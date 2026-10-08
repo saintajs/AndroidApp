@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant usr_employee as "Employee"
+    participant ui_app as "mobile-app (Compose)"
+    participant svc_api as "api (FastAPI)"
+    participant db_postgres as "PostgreSQL"
+    ui_app->>svc_api: GET /api/incidents - Authorization Bearer JWT
+    Note over svc_api: owner filter from token subject - no client parameter can widen it (INSTR-001, BR-009)
+    svc_api->>db_postgres: SELECT incidents WHERE owner_id ORDER BY created_at DESC - no pagination (BR-019, BR-020)
+    db_postgres-->>svc_api: owned incident rows (list items omit description)
+    svc_api-->>ui_app: 200 JSON array newest first
+    ui_app-->>usr_employee: S-02 cards - loading, empty Sin incidencias, or error+retry states
+    opt employee taps a filter chip - Todas Pendiente En progreso Resuelta (FUNC-004)
+        ui_app->>svc_api: GET /api/incidents?status=pending (or in_progress, resolved, all)
+        svc_api-->>ui_app: 200 filtered owned array - chip counts update live (BR-017)
+    end
+    opt employee taps an incident card
+        ui_app->>svc_api: GET /api/incidents/{id}
+        alt owner and exists
+            svc_api->>db_postgres: SELECT incident + incident_history WHERE incident_id ORDER BY changed_at ASC (BR-021)
+            db_postgres-->>svc_api: detail row + history rows
+            svc_api-->>ui_app: 200 incident with description + history array
+            ui_app-->>usr_employee: open S-04 Detalle de incidencia - Historial de estados timeline
+        else missing or foreign id - indistinguishable safe response
+            svc_api-->>ui_app: 404 detail Incidencia no encontrada
+            ui_app-->>usr_employee: safe no-access state - Incidencia no disponible (BR-010)
+        end
+    end
+    opt token failure on any call
+        svc_api-->>ui_app: 401 detail No autenticado
+        Note over ui_app: expired-token recovery flow - route S-01 (network errors instead keep error+retry, CONF-009)
+    end

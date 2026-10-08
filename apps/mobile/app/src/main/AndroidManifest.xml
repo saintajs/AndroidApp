@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      CA-01 / BR-031: EXACTLY ONE real permission request — android.permission.INTERNET,
+      consumed solely by the US-012 network layer (Retrofit/OkHttp). No other
+      uses-permission of any kind (no notifications, camera, location, storage,
+      contacts, microphone). androidx.core (transitive via Compose) injects the
+      signature-level DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION — the stripper below
+      stays so the MERGED manifest also ends with exactly one uses-permission.
+      Portrait-only and no deep-link intent filters below.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="com.nexti.minisoporte.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        tools:node="remove" />
+
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MiniSoporte">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MiniSoporte">
+            <!-- Launcher entry only — no BROWSABLE/VIEW data filters (no deep links). -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,292 @@
+{
+  "key": "activity-flow-001",
+  "edges": {
+    "d_rl->n_429": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-007",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_rl->d_cred": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_cred->n_401": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-002",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "act_me->n_home": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "GET /api/me",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "act_submit->d_rl": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "act_store->act_me": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-006",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_cred->act_store": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "n_start->act_enter": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_enter->d_fields": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-001",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_fields->act_submit": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_fields->n_fielderr": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      }
+    ]
+  },
+  "nodes": {
+    "d_rl": {
+      "kind": "decision",
+      "label": "Failure budget available? (BR-007)",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-007",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_401": {
+      "kind": "action",
+      "label": "401 - Credenciales inv\u00e1lidas - generic inline error",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-002",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_429": {
+      "kind": "action",
+      "label": "429 - Demasiados intentos. Int\u00e9ntelo de nuevo m\u00e1s tarde. + Retry-After",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-007",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_me": {
+      "kind": "action",
+      "label": "Optional GET /api/me for the S-02 subtitle",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "GET /api/me",
+          "section_file": "api-contract.md"
+        }
+      ]
+    },
+    "d_cred": {
+      "kind": "decision",
+      "label": "Credentials valid and account active? (BR-002)",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-002",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_home": {
+      "kind": "action",
+      "label": "S-02 Mis incidencias - session valid 8 h",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "n_start": {
+      "kind": "action",
+      "label": "Open app without valid token",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "d_fields": {
+      "kind": "decision",
+      "label": "Both fields filled? (BR-001)",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-001",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_enter": {
+      "kind": "action",
+      "label": "Enter Correo electr\u00f3nico and Contrase\u00f1a",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-001",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_store": {
+      "kind": "action",
+      "label": "Store token in Keystore-backed storage (BR-006)",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-006",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_submit": {
+      "kind": "action",
+      "label": "Tap primary button - locked while in flight (BR-003)",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "POST /api/auth/login",
+          "section_file": "api-contract.md"
+        },
+        {
+          "artifact": "BR-003",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_fielderr": {
+      "kind": "action",
+      "label": "Show Spanish per-field errors (INSTR-011)",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_api": {
+      "kind": "action",
+      "label": "api",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_app": {
+      "kind": "action",
+      "label": "mobile-app",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_employee": {
+      "kind": "action",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "FLOW-001",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-001 Employee authentication flow"
+}

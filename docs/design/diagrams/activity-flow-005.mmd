@@ -1,0 +1,25 @@
+flowchart TD
+    subgraph sg_lane_employee["Employee"]
+        n_start(["Sign in on S-01"])
+        n_signedout(["Confirmation toast - route S-01 - protected screens unreachable"])
+    end
+    subgraph sg_lane_app["mobile-app"]
+        act_store(["Store token Keystore-backed (BR-006)"])
+        act_use(["Authenticated use - Bearer header on every protected call"])
+        d_exit{"Employee taps Salir, token expires, or account deactivated?"}
+        act_signout(["Client deletes Keystore token - NO server endpoint (Q-008)"])
+        n_401(["401 - No autenticado - expired-token recovery flow"])
+        n_403(["403 - Cuenta inactiva - clear token - route S-01"])
+    end
+    subgraph sg_lane_api["api"]
+        act_login(["POST /api/auth/login - JWT HS256 exp issued + 28800 s (CONF-001, BR-004)"])
+    end
+    n_start --> act_login
+    act_login --> act_store
+    act_store --> act_use
+    act_use --> d_exit
+    d_exit -->|"Salir tapped (BR-005)"| act_signout
+    act_signout --> n_signedout
+    d_exit -->|"8 h token expiry"| n_401
+    d_exit -->|"account deactivated mid-session"| n_403
+    d_exit -->|"neither - session continues"| act_use

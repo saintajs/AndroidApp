@@ -1,0 +1,14 @@
+-- MiniSoporte — PostgreSQL init stub (docker-entrypoint-initdb.d hook).
+--
+-- This file is a DELIBERATE NO-OP. It exists only so the local-dev docker-compose
+-- stack has an explicit, documented mount point for database initialization.
+--
+-- The database and its owner are created by the postgres image itself from
+-- POSTGRES_DB / POSTGRES_USER (see infra/docker-compose.yml) — no SQL needed for that.
+--
+-- SCHEMA IS ALWAYS APPLIED VIA `alembic upgrade head`.
+-- No tables, extensions, roles or grants may ever be created here: bootstrap SQL
+-- would drift from the Alembic migrations, which are the single source of truth
+-- for the database schema. Nothing in any test depends on this file.
+--
+-- (intentionally empty)

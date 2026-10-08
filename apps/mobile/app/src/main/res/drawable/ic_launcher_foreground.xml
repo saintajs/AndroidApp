@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Simple brand mark: amber support wrench on the primary green. -->
+    <path
+        android:fillColor="#EFC64E"
+        android:pathData="M54,30c-8.8,0 -16,7.2 -16,16c0,8.8 7.2,16 16,16c2.6,0 5.1,-0.6 7.3,-1.8L74,73l4,-4l-12.8,-12.7C66.4,54.1 70,50.5 70,46c0,-8.8 -7.2,-16 -16,-16zM54,38c4.4,0 8,3.6 8,8s-3.6,8 -8,8s-8,-3.6 -8,-8S49.6,38 54,38z" />
+</vector>

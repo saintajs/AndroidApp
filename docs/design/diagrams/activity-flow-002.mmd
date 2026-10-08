@@ -1,0 +1,27 @@
+flowchart TD
+    subgraph sg_lane_employee["Employee"]
+        n_start(["Tap FAB + on S-02"])
+        act_fill(["Fill Título, Categoría, Prioridad, Descripción with live counters"])
+        n_fielderr(["Field-level errors - nothing created (INSTR-011, BR-018)"])
+        act_save(["Tap Guardar incidencia - locks to Guardando…"])
+        n_done(["Return to S-02 - new Pendiente card first (BR-019)"])
+    end
+    subgraph sg_lane_app["mobile-app"]
+        d_valid{"All fields within rules - title 5-100, description 10-1000, category and priority chosen? (BR-013, BR-014, BR-015, BR-016)"}
+        d_auth{"Token valid?"}
+        n_recover(["Expired-token recovery - clear token, route S-01"])
+    end
+    subgraph sg_lane_api["api"]
+        act_post(["POST /api/incidents with Bearer JWT - extra=forbid, status always pending (INSTR-002)"])
+        d_created{"Server accepts (201)? (BR-011)"}
+    end
+    n_start --> act_fill
+    act_fill --> d_valid
+    d_valid -->|"no"| n_fielderr
+    d_valid -->|"yes"| act_save
+    act_save --> act_post
+    act_post --> d_auth
+    d_auth -->|"no"| n_recover
+    d_auth -->|"yes"| d_created
+    d_created -->|"no - 422 field errors"| n_fielderr
+    d_created -->|"yes"| n_done

@@ -1,0 +1,288 @@
+{
+  "key": "activity-flow-004",
+  "edges": {
+    "act_db->n_ok": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "d_role->n_403": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-022",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_found->n_404": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-010",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_legal->n_409": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-023",
+        "section_file": "business-rules.md"
+      },
+      {
+        "artifact": "BR-024",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_role->d_found": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      }
+    ],
+    "d_found->d_legal": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      }
+    ],
+    "act_patch->d_role": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "PATCH /api/incidents/{id}/status",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "act_write->act_db": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-025",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "d_legal->act_write": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-025",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "n_start->act_patch": [
+      {
+        "artifact": "FLOW-004",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ]
+  },
+  "nodes": {
+    "n_ok": {
+      "kind": "action",
+      "label": "200 - incident + latest_history",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "PATCH /api/incidents/{id}/status",
+          "section_file": "api-contract.md"
+        }
+      ]
+    },
+    "n_403": {
+      "kind": "action",
+      "label": "403 - No autorizado",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-022",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_404": {
+      "kind": "action",
+      "label": "404 - Incidencia no encontrada",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-010",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_409": {
+      "kind": "action",
+      "label": "409 - Transici\u00f3n de estado no v\u00e1lida",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-023",
+          "section_file": "business-rules.md"
+        },
+        {
+          "artifact": "BR-024",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "act_db": {
+      "kind": "action",
+      "label": "UPDATE incidents + INSERT incident_history",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-025",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "d_role": {
+      "kind": "decision",
+      "label": "Caller role is support? (BR-022)",
+      "source": [
+        {
+          "artifact": "BR-022",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "d_found": {
+      "kind": "decision",
+      "label": "Incident exists? (BR-010)",
+      "source": [
+        {
+          "artifact": "BR-010",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "d_legal": {
+      "kind": "decision",
+      "label": "Linear transition legal? (BR-023, BR-024)",
+      "source": [
+        {
+          "artifact": "BR-023",
+          "section_file": "business-rules.md"
+        },
+        {
+          "artifact": "BR-024",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "n_start": {
+      "kind": "action",
+      "label": "Start",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "act_patch": {
+      "kind": "action",
+      "label": "PATCH /api/incidents/{id}/status with new_status",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "PATCH /api/incidents/{id}/status",
+          "section_file": "api-contract.md"
+        }
+      ]
+    },
+    "act_write": {
+      "kind": "action",
+      "label": "One transaction - update incidents status + insert immutable incident_history (BR-025)",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        },
+        {
+          "artifact": "BR-025",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "sg_lane_db": {
+      "kind": "participant",
+      "label": "Database",
+      "source": [
+        {
+          "artifact": "PostgreSQL 16.15",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_api": {
+      "kind": "participant",
+      "label": "api",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        }
+      ]
+    },
+    "sg_lane_support": {
+      "kind": "participant",
+      "label": "Support agent",
+      "source": [
+        {
+          "artifact": "FLOW-004",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "FLOW-004 Support status update flow"
+}

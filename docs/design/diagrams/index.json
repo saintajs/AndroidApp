@@ -1,0 +1,181 @@
+{
+  "diagrams": [
+    {
+      "key": "architecture-context",
+      "type": "architecture_context",
+      "title": "System context - MiniSoporte actors and zero external integrations",
+      "file": "architecture-context.mmd",
+      "meta_file": "architecture-context.meta.json",
+      "related_sections": []
+    },
+    {
+      "key": "architecture-containers",
+      "type": "architecture",
+      "title": "Containers - mobile-app, api, PostgreSQL 16.15",
+      "file": "architecture-containers.mmd",
+      "meta_file": "architecture-containers.meta.json",
+      "related_sections": []
+    },
+    {
+      "key": "architecture-api",
+      "type": "architecture_component",
+      "title": "api container - layered FastAPI routes, core, domain, persistence",
+      "file": "architecture-api.mmd",
+      "meta_file": "architecture-api.meta.json",
+      "related_sections": [],
+      "flow_key": "api"
+    },
+    {
+      "key": "architecture-mobile-app",
+      "type": "architecture_component",
+      "title": "mobile-app container - Compose UI, data, network, security",
+      "file": "architecture-mobile-app.mmd",
+      "meta_file": "architecture-mobile-app.meta.json",
+      "related_sections": [],
+      "flow_key": "mobile-app"
+    },
+    {
+      "key": "erd-postgresql",
+      "type": "erd",
+      "title": "PostgreSQL 16.15 ERD - users, incidents, incident_history",
+      "file": "erd-postgresql.mmd",
+      "meta_file": "erd-postgresql.meta.json",
+      "related_sections": [],
+      "flow_key": "postgresql"
+    },
+    {
+      "key": "sequence-flow-001",
+      "type": "sequence",
+      "title": "FLOW-001 Employee authentication flow",
+      "file": "sequence-flow-001.mmd",
+      "meta_file": "sequence-flow-001.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-001"
+    },
+    {
+      "key": "sequence-flow-002",
+      "type": "sequence",
+      "title": "FLOW-002 Incident creation flow",
+      "file": "sequence-flow-002.mmd",
+      "meta_file": "sequence-flow-002.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-002"
+    },
+    {
+      "key": "sequence-flow-003",
+      "type": "sequence",
+      "title": "FLOW-003 Incident review flow (list, filter, details)",
+      "file": "sequence-flow-003.mmd",
+      "meta_file": "sequence-flow-003.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-003"
+    },
+    {
+      "key": "sequence-flow-004",
+      "type": "sequence",
+      "title": "FLOW-004 Support status update flow",
+      "file": "sequence-flow-004.mmd",
+      "meta_file": "sequence-flow-004.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-004"
+    },
+    {
+      "key": "sequence-flow-005",
+      "type": "sequence",
+      "title": "FLOW-005 Session lifecycle (sign in to sign out)",
+      "file": "sequence-flow-005.mmd",
+      "meta_file": "sequence-flow-005.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-005"
+    },
+    {
+      "key": "screens",
+      "type": "screens",
+      "title": "Screens - S-01 to S-04 navigation",
+      "file": "screens.mmd",
+      "meta_file": "screens.meta.json",
+      "related_sections": []
+    },
+    {
+      "key": "sequence-flow-006",
+      "type": "sequence",
+      "title": "FLOW-006 Development environment initialization",
+      "file": "sequence-flow-006.mmd",
+      "meta_file": "sequence-flow-006.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-006"
+    },
+    {
+      "key": "sequence-expired-token-recovery",
+      "type": "sequence",
+      "title": "Expired-token recovery (401 \u2192 re-authenticate)",
+      "file": "sequence-expired-token-recovery.mmd",
+      "meta_file": "sequence-expired-token-recovery.meta.json",
+      "related_sections": [],
+      "flow_key": "expired-token-recovery"
+    },
+    {
+      "key": "activity-flow-001",
+      "type": "activity",
+      "title": "FLOW-001 Employee authentication flow",
+      "file": "activity-flow-001.mmd",
+      "meta_file": "activity-flow-001.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-001"
+    },
+    {
+      "key": "activity-flow-002",
+      "type": "activity",
+      "title": "FLOW-002 Incident creation flow",
+      "file": "activity-flow-002.mmd",
+      "meta_file": "activity-flow-002.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-002"
+    },
+    {
+      "key": "activity-flow-003",
+      "type": "activity",
+      "title": "FLOW-003 Incident review flow (list, filter, details)",
+      "file": "activity-flow-003.mmd",
+      "meta_file": "activity-flow-003.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-003"
+    },
+    {
+      "key": "activity-flow-004",
+      "type": "activity",
+      "title": "FLOW-004 Support status update flow",
+      "file": "activity-flow-004.mmd",
+      "meta_file": "activity-flow-004.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-004"
+    },
+    {
+      "key": "activity-flow-005",
+      "type": "activity",
+      "title": "FLOW-005 Session lifecycle (sign in to sign out)",
+      "file": "activity-flow-005.mmd",
+      "meta_file": "activity-flow-005.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-005"
+    },
+    {
+      "key": "activity-flow-006",
+      "type": "activity",
+      "title": "FLOW-006 Development environment initialization",
+      "file": "activity-flow-006.mmd",
+      "meta_file": "activity-flow-006.meta.json",
+      "related_sections": [],
+      "flow_key": "FLOW-006"
+    },
+    {
+      "key": "activity-expired-token-recovery",
+      "type": "activity",
+      "title": "Expired-token recovery (401 \u2192 re-authenticate)",
+      "file": "activity-expired-token-recovery.mmd",
+      "meta_file": "activity-expired-token-recovery.meta.json",
+      "related_sections": [],
+      "flow_key": "expired-token-recovery"
+    }
+  ]
+}

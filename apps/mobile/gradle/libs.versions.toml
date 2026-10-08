@@ -1,0 +1,65 @@
+# Single source of version truth for the whole mobile epic (Q-013).
+# Pins are verbatim from openspec/config.yaml `stack:` — do NOT drift.
+# US-012 (android-real-backend-integration) pins the network stack below:
+# Retrofit 3.0.0 / OkHttp 5.5.0 / kotlinx-serialization-json 1.11.0.
+
+[versions]
+agp = "8.13.2"
+kotlin = "2.3.21"
+ktlintGradlePlugin = "13.1.0"
+composeBom = "2026.06.01"
+activityCompose = "1.11.0"
+lifecycleViewmodelCompose = "2.9.0"
+lifecycleRuntimeCompose = "2.9.0"
+navigationCompose = "2.9.0"
+kotlinxCoroutinesAndroid = "1.10.2"
+kotlinxCoroutinesTest = "1.10.2"
+robolectric = "4.16.1"
+junit = "4.13.2"
+androidxTestRunner = "1.6.1"
+androidxTestExtJunit = "1.2.1"
+retrofit = "3.0.0"
+okhttp = "5.5.0"
+kotlinxSerializationJson = "1.11.0"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradlePlugin" }
+
+[libraries]
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+
+# BOM-managed (no version here — composeBom decides)
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+
+test-junit = { group = "junit", name = "junit", version.ref = "junit" }
+# Instrumented (androidTest) tier — authoritative verification of the platform
+# secure-storage-backed TokenStore (testing.yaml, KeystoreTokenStore harness).
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+
+# Network stack (US-012 / CA-02) — Retrofit 3.0.0 over OkHttp 5.5.0,
+# kotlinx-serialization-json 1.11.0 as the JSON runtime (the converter pulls its
+# own kotlinx-serialization core; this explicit json pin stands).
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }

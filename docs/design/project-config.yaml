@@ -1,0 +1,217 @@
+project: MiniSoporte_copy
+project_type: new
+architecture: mobile_backend
+stack:
+  python: '3.10'
+  fastapi: 0.123.10
+  pydantic: '>= 2.11'
+  sqlalchemy: 2.0.54
+  alembic: 1.20.0
+  psycopg: '>= 3.2'
+  bcrypt: 4.3.0
+  pyjwt: 2.15.1
+  uvicorn: 0.54.0
+  pytest: 8.3.3
+  pytest_cov: '>= 6.0'
+  httpx: '>= 0.28'
+  uv: '>= 0.8'
+  postgresql: '16.15'
+  kotlin: 2.3.21
+  android_gradle_plugin: 8.13.2
+  gradle_wrapper: '8.14'
+  compose_bom: 2026.09.00
+  activity_compose: 1.11.0
+  lifecycle_viewmodel_compose: 2.9.0
+  navigation_compose: 2.9.0
+  kotlinx_coroutines_android: 1.10.2
+  retrofit: 3.0.0
+  okhttp: 5.5.0
+  kotlinx_serialization_json: 1.11.0
+  junit4_compose_ui_test: BOM-managed
+  min_sdk: '26'
+  target_sdk: '36'
+  compile_sdk: '36'
+  android_build_tools: 36.0.0
+  java_jvm_target: '17'
+archetype:
+  app_root: apps/mobile
+  workspace:
+    tool: uv workspace
+    root: .
+    members:
+    - services/*
+    shared_packages: []
+  layout: "pyproject.toml            # uv workspace root: [tool.uv.workspace] members\
+    \ = [\"services/*\"]\n.env.example              # env template (no real values);\
+    \ .env is Git-excluded\napps/mobile/              # Android app (Gradle-managed,\
+    \ own settings.gradle.kts):\n                          #   app/src/main/java/com/nexti/minisoporte/{ui/{theme,navigation,signin,\n\
+    \                          #   incidents,newincident,detail,components},data/{model,repository,fake,remote},\n\
+    \                          #   network,security}, app/src/test, gradle/libs.versions.toml\n\
+    services/api/             # FastAPI layered API (uv workspace member):\n     \
+    \                     #   app/{api/{deps,routes},core/{config,security,ratelimit},\n\
+    \                          #   domain/{enums,models,schemas,services},db/{session,repositories},seed},\n\
+    \                          #   migrations/versions, tests/{unit,integration}\n\
+    infra/                    # local dev only: docker-compose.yml (PostgreSQL 16.15)\
+    \ + init SQL stub;\n                          #   verification uses TEST_DATABASE_URL,\
+    \ never Docker\n"
+  conventions:
+  - Android app organized by feature under ui/, with data access behind the IncidentRepository
+    interface (FakeIncidentRepository for debug/previews/tests, Retrofit remote for
+    REST integration)
+  - 'Backend layered: api routes -> domain services -> db repositories; strict typing
+    and dependency injection via FastAPI Depends; Pydantic v2 schemas in domain/schemas'
+  - All schema changes ship as Alembic migrations; the ORM is the only database access
+    path
+  - 'Tests mirror the source tree: services/api/tests/{unit,integration}, apps/mobile/app/src/test'
+conventions:
+  backend:
+  - Layered clean-code structure (api/core/domain/db) with dependency injection and
+    strict typing (CONF-011)
+  - Every route declares its access level explicitly (public / authenticated / owner
+    / support role)
+  - Owner-scoped queries at the repository layer; status transition matrix and history
+    writes in domain services
+  - Secrets read only from environment variables via pydantic-settings; fail fast
+    on missing required values
+  frontend: []
+env:
+  environments:
+  - development
+  - internal-test
+  - test
+  secrets: Environment variables only (DATABASE_URL, JWT_SECRET, ENVIRONMENT, DEMO_EMPLOYEE_PASSWORD,
+    DEMO_SUPPORT_PASSWORD, DEMO_SUPPORT_EMAIL; Android release signing via ANDROID_KEYSTORE_PATH/ANDROID_KEYSTORE_PASSWORD/ANDROID_KEY_ALIAS/ANDROID_KEY_PASSWORD
+    read only for assembleRelease); .env, keystores and key.properties are Git-excluded;
+    no cloud secret manager
+security_baseline:
+  auth: Email + password sign-in issuing JWT HS256 8-hour bearer tokens (PyJWT 2.15.1,
+    explicit algorithms allow-list, no refresh); bcrypt password hashing used directly
+    (no passlib); roles employee/support with owner-scoped incident access and a support-only
+    status endpoint; in-memory per-IP/per-email rate limiting on failed sign-ins
+  notes:
+  - Owner isolation on every incident query; safe non-leaking responses for missing
+    or foreign incidents
+  - Session token stored only in Android Keystore-backed storage, deleted on sign-out;
+    client-side deletion + 8 h TTL is the accepted sign-out mitigation (Q-008)
+  - All database access parameterized via SQLAlchemy ORM; HTTPS mandatory outside
+    local development
+  - Zero Android permissions, no push notifications, no deep links, online only
+  - Passwords and tokens never logged; generic authentication errors prevent account
+    enumeration
+  - Integration tests must prove ownership isolation and role protection at >=90%
+    business-logic coverage (INSTR-013)
+design_tokens:
+  color-palette:
+    primary: 'Hex: #1E3A2A; Usage: App bar / hero band background, primary buttons,
+      selected chips & choice options, active states'
+    primary-hover: 'Hex: #2A4E39; Usage: Pressed/hover state of primary buttons and
+      selected controls'
+    secondary (accent): 'Hex: #EFC64E; Usage: FAB background, brand accent, demo-hint
+      border highlights'
+    accent-soft: 'Hex: #FBF1D4; Usage: Demo hint box background, pending status badge
+      background'
+    background: 'Hex: #F5F7F5; Usage: Screen background behind cards and bars'
+    surface: 'Hex: #FFFFFF; Usage: Cards, bottom navigation bar, form fields, sheet
+      backgrounds'
+    text-primary: 'Hex: #1C2B22; Usage: Primary text: titles, body, field values'
+    text-muted: 'Hex: #5C6B62; Usage: Secondary text: subtitles, metadata, hints,
+      counters'
+    border: 'Hex: #DDE4DF; Usage: Card borders, field outlines, dividers, bottom-nav
+      top border'
+    danger / error: 'Hex: #B3261E; Usage: Field error borders/text, destructive semantics'
+    danger-soft: 'Hex: #FBEAE9; Usage: Error field background'
+    status-pending-bg: 'Hex: #FBF1D4; Usage: "Pendiente" status badge background'
+    status-pending-fg: 'Hex: #7A5B10; Usage: "Pendiente" status badge text'
+    status-in-progress-bg: 'Hex: #E1EAF6; Usage: "En progreso" status badge background'
+    status-in-progress-fg: 'Hex: #2A4E79; Usage: "En progreso" status badge text'
+    status-resolved-bg: 'Hex: #DFEFE3; Usage: "Resuelta" status badge background'
+    status-resolved-fg: 'Hex: #1E5B36; Usage: "Resuelta" status badge text'
+    text-on-primary: 'Hex: #FFFFFF; Usage: Text and icons on primary surfaces (app
+      bar, primary buttons)'
+    priority-high-border: 'Hex: #C4463E; Usage: "Alta" priority pill border'
+    priority-high-text: 'Hex: #A32E27; Usage: "Alta" priority pill text'
+    priority-medium-border: 'Hex: #B98A1E; Usage: "Media" priority pill border'
+    priority-medium-text: 'Hex: #7A5B10; Usage: "Media" priority pill text'
+    priority-low-border: 'Hex: #6B8F7A; Usage: "Baja" priority pill border'
+    priority-low-text: 'Hex: #446B54; Usage: "Baja" priority pill text'
+  button-styles:
+    Primary (filled): 'Background: #1E3A2A; Color: #FFFFFF; Border: none; Border-radius:
+      8px; Padding: 14px 16px, min-height 48px'
+    Secondary / outline (retry): 'Background: #FFFFFF; Color: #1E3A2A; Border: 1px
+      solid #1E3A2A; Border-radius: 8px; Padding: 10px 24px, min-height 44px'
+    Text-link / app-bar button ("Salir", "Volver"): 'Background: rgba(255,255,255,0.12)
+      on the #1E3A2A bar; Color: #FFFFFF; Border: 1px solid rgba(255,255,255,0.25);
+      Border-radius: 8px; Padding: 8px 14px, min-height 40px'
+    Danger: 'Background: #B3261E (where a destructive action is used; the draft uses
+      danger mainly as field-error styling: 1px solid #B3261E border on #FBEAE9 background);
+      Color: #FFFFFF; Border: none; Border-radius: 8px; Padding: 14px 16px, min-height
+      48px'
+    Filter chip (pill): 'Background: unselected: #FFFFFF; selected: #1E3A2A with #FFFFFF
+      text; Color: #1C2B22 unselected / #FFFFFF selected; Border: 1px solid #DDE4DF
+      unselected; 1px solid #1E3A2A selected; Border-radius: 999px (pill); Padding:
+      8px 14px, min-height 36px'
+    Choice group option (Categoría / Prioridad): 'Background: unselected: #FFFFFF;
+      selected: #1E3A2A with #FFFFFF text; Color: #1C2B22 unselected / #FFFFFF selected;
+      Border: 1px solid #DDE4DF unselected; 1px solid #1E3A2A selected; Border-radius:
+      8px; Padding: 10px 14px, min-height 40px'
+    FAB (centered, bottom nav): 'Background: #EFC64E; Color: icon/text #1E3A2A; Border:
+      3px solid #F5F7F5; Border-radius: 50% (circle); Padding: 52×52dp, raised shadow
+      0 4px 16px rgba(30,58,42,0.18)'
+  typography:
+    heading-xl: 'Font-family: system sans (Roboto on Android); Size: 26px / 1.625rem;
+      Weight: 800; Line-height: 1.2'
+    heading-lg: 'Font-family: system sans (Roboto on Android); Size: 18px / 1.125rem;
+      Weight: 700; Line-height: 1.3'
+    heading-md: 'Font-family: system sans (Roboto on Android); Size: 15px / 0.9375rem;
+      Weight: 700; Line-height: 1.4'
+    body: 'Font-family: system sans (Roboto on Android); Size: 15px / 0.9375rem; Weight:
+      400; Line-height: 1.5'
+    body-small: 'Font-family: system sans (Roboto on Android); Size: 14px / 0.875rem;
+      Weight: 400; Line-height: 1.45'
+    caption: 'Font-family: system sans (Roboto on Android); Size: 12.5px / 0.78rem;
+      Weight: 400; Line-height: 1.4'
+    label: 'Font-family: system sans (Roboto on Android); Size: 13px / 0.8125rem;
+      Weight: 600; Line-height: 1.35'
+    button: 'Font-family: system sans (Roboto on Android); Size: 15px / 0.9375rem;
+      Weight: 700; Line-height: 1.2'
+    badge: 'Font-family: system sans (Roboto on Android); Size: 12px / 0.75rem; Weight:
+      700; Line-height: 1.2'
+    chip: 'Font-family: system sans (Roboto on Android); Size: 13.5px / 0.84rem; Weight:
+      600; Line-height: 1.2'
+    bottom-nav: 'Font-family: system sans (Roboto on Android); Size: 11.5px / 0.72rem;
+      Weight: 600; Line-height: 1.2'
+  spacing-layout-tokens:
+    Base grid: '8px unit. Steps: space-1 = 8px, space-2 = 16px, space-3 = 24px, space-4
+      = 32px.'
+    Card style: 'surface #FFFFFF, border 1px solid #DDE4DF, radius 8px, shadow `0
+      1px 2px rgba(30,58,42,0.08), 0 2px 8px rgba(30,58,42,0.06)`, internal padding
+      16px.'
+    Phone-portrait layout: full-width single column, content padding 16px, portrait-only
+      (390×844 baseline; scales to other phone widths as a single column). No container
+      max-width beyond the phone frame — the only cap is the login card at 480px.
+    App bar: 'background #1E3A2A, white text (#FFFFFF), brand mark left, optional
+      app-bar button right (rgba(255,255,255,0.12) background with rgba(255,255,255,0.25)
+      border).'
+    Bottom navigation bar: '(list screen): surface #FFFFFF with top border 1px solid
+      #DDE4DF, centered accent FAB (#EFC64E, 52dp circle, 3px #F5F7F5 border).'
+    Sign-in screen: 'full-width primary hero band (#1E3A2A) with brand mark and title/subtitle,
+      then the centered white login card on #F5F7F5.'
+    Corners: 8px radius everywhere except pills/chips/badges (999px pill) and the
+      FAB (circle).
+    Focus ring: 3px rgba(30,58,42,0.15) around focused fields and controls (maps to
+      Compose focus/indication styling for keyboard and TalkBack navigation).
+run:
+  apps:
+  - name: mobile-app
+    build: npm run build
+    serve: npx serve -s dist -l 3003
+    port: 3003
+    health: /
+    ready: 200 + stylesheet linked + root element non-empty
+  - name: api
+    build: pip install -r requirements.txt
+    serve: python -m uvicorn app.main:app --port 8000
+    port: 8000
+    health: /health
+    ready: health endpoint returns 200
+  _fallback: true

@@ -1,0 +1,252 @@
+{
+  "assessment": "Checked all extraction docs (9 functionalities, 11 instructions, 11 config/infra, 6 flows) against the pinned stack: FastAPI 0.123.10 on Python 3.10, PostgreSQL 16.15, pytest 8.3.3, Kotlin/Jetpack Compose Android client (com.nexti.minisoporte). No nwiki/ exists (greenfield). Phase A surfaced missing definitions around user provisioning, token mechanics, data access, rate limiting, Android networking, minSdk, pagination, and sign-out semantics. Phase B verified versions via live sources: (1) VERSION COMPATIBILITY \u2014 PyPI shows FastAPI 0.123.10 is real (Dec 5, 2025) and the current release is 0.142.2 (Sep 30, 2026); both require Python >=3.10 and Pydantic v2, so the pin is valid but one year behind; passlib is unmaintained since 1.7.4 (Oct 8, 2020) and breaks with bcrypt >= 4.1 per pyca/bcrypt issue #684 ('AttributeError: module bcrypt has no attribute __about__'), so the classic FastAPI passlib-bcrypt pairing must be avoided; PyJWT is actively maintained (2.15.1, Sep 28, 2026); SQLAlchemy 2.0.54 is the maintenance series and 2.1.3 (Oct 2, 2026) the current series per sqlalchemy.org/download.html. (2) CROSS-LIBRARY PAIRINGS \u2014 passlib 1.7.4 vs bcrypt 4.x is the one verified breakage; SQLAlchemy 2.0.x/2.1.x + Alembic and PyJWT + FastAPI 0.123.x/Pydantic v2 have no known incompatibilities. (3) ARCHITECTURE FIT \u2014 the layered, DI-based FastAPI structure fits SQLAlchemy 2.0-style sessions and Pydantic v2 schemas with no friction. (4) INFRASTRUCTURE/DEPLOYMENT \u2014 internal-testing only with no cloud infra selected, so an in-process rate limiter suffices; no Redis/worker tier exists in the target plan. (5) SCALE-SENSITIVE CHOICES \u2014 single-employee-base internal tool: unbounded incident lists and in-memory state are acceptable for v1 but pagination behavior should be decided explicitly. On Android, Maven Central shows Retrofit 3.0.0 (May 2025, Kotlin-first) as current over the 2.x line, and Google Maven shows Compose BOM 2026.09.00 as current. Findings below are ordered: missing definitions first, then compatibility decisions.",
+  "questions": [
+    {
+      "id": "Q-001",
+      "category": "missing_definition",
+      "question": "How are employee and support accounts provisioned, since no registration endpoint, admin screen, or user-management flow exists in v1 and the seed only creates demo accounts in non-production?",
+      "rationale": "FUNC-009 only seeds one demo employee and one demo support agent in development; INSTR-010 forbids seeding in production. Without a stated provisioning path, real employees in the internal-test deployment have no way to get an account or password.",
+      "type": "single_choice",
+      "options": [
+        "Out of scope for v1 \u2014 operations inserts users directly into the User table via SQL/scripts",
+        "Documented CLI management command (e.g. create-user script) reading password from environment variables",
+        "Extend the demo seed so the internal-test environment also runs it manually with configured emails",
+        "Add an authenticated admin-only user-creation endpoint to the API in v1",
+        "Other"
+      ],
+      "recommended": "Documented CLI management command (e.g. create-user script) reading password from environment variables",
+      "runner_up": "Out of scope for v1 \u2014 operations inserts users directly into the User table via SQL/scripts",
+      "affects_stack": false,
+      "alt_values": []
+    },
+    {
+      "id": "Q-002",
+      "category": "missing_definition",
+      "question": "What concrete token format and expiration should the signed session token use?",
+      "rationale": "CONF-001 mandates signed tokens with expiration and signature validation but does not name a format or lifetime; the Android client (CONF-002) stores one token with no refresh flow, so the TTL decides how often employees are forced to sign in again.",
+      "type": "single_choice",
+      "options": [
+        "JWT (HS256) with 8-hour expiration, no refresh token",
+        "JWT (HS256) with 24-hour expiration, no refresh token",
+        "JWT (HS256) with 30-minute access token plus refresh-token endpoint",
+        "Opaque random token with server-side session table and expiry column",
+        "Other"
+      ],
+      "recommended": "JWT (HS256) with 8-hour expiration, no refresh token",
+      "runner_up": "JWT (HS256) with 24-hour expiration, no refresh token",
+      "affects_stack": false,
+      "alt_values": []
+    },
+    {
+      "id": "Q-003",
+      "category": "missing_definition",
+      "question": "Which data-access and migration approach should the backend use for PostgreSQL 16.15?",
+      "rationale": "CONF-005 allows 'parameterized queries or ORM' and CONF-008 requires reproducible migrations, but neither an ORM nor a migration tool is named. SQLAlchemy's download page (checked Oct 2026) shows 2.0.54 as the maintenance series and 2.1.3 as the current series, so a series must be picked deliberately.",
+      "type": "single_choice",
+      "options": [
+        "SQLAlchemy 2.0.x ORM (maintenance series, 2.0.54) + Alembic migrations",
+        "SQLAlchemy 2.1.x ORM (current series, 2.1.3) + Alembic migrations",
+        "Raw asyncpg/psycopg parameterized SQL + plain SQL migration scripts applied in order",
+        "Raw parameterized SQL + Alembic managing schema without ORM models",
+        "Other"
+      ],
+      "recommended": "SQLAlchemy 2.0.x ORM (maintenance series, 2.0.54) + Alembic migrations",
+      "runner_up": "SQLAlchemy 2.1.x ORM (current series, 2.1.3) + Alembic migrations",
+      "affects_stack": true,
+      "alt_values": [
+        "SQLAlchemy 2.1.x ORM (current series, 2.1.3) + Alembic migrations",
+        "Raw asyncpg/psycopg parameterized SQL + plain SQL migration scripts applied in order"
+      ]
+    },
+    {
+      "id": "Q-004",
+      "category": "missing_definition",
+      "question": "How should rate limiting on POST /api/auth/login be implemented, given no cache/Redis tier exists in the target plan?",
+      "rationale": "CONF-003 requires throttling of failed sign-in attempts without leaking account existence, but no limiter technology is named. The target plan has only FastAPI + PostgreSQL, so the limiter's state store is an open infrastructure decision.",
+      "type": "single_choice",
+      "options": [
+        "In-process in-memory limiter (per-IP and per-email counters) built with FastAPI dependencies",
+        "slowapi (Starlette rate-limit library) with in-memory backend",
+        "PostgreSQL-backed attempt table with time-window queries (survives restarts, multi-worker safe)",
+        "In-memory limiter in v1 plus a documented upgrade path to a shared store if multi-worker deployment arrives",
+        "Other"
+      ],
+      "recommended": "In-process in-memory limiter (per-IP and per-email counters) built with FastAPI dependencies",
+      "runner_up": "PostgreSQL-backed attempt table with time-window queries (survives restarts, multi-worker safe)",
+      "affects_stack": false,
+      "alt_values": []
+    },
+    {
+      "id": "Q-005",
+      "category": "missing_definition",
+      "question": "Which HTTP client and JSON serialization stack should the Android app use to call the REST API?",
+      "rationale": "CONF-011 defines the API surface and the mobile contract fixes Kotlin/Compose, but no networking or serialization library is named; the token header, error parsing, and retry paths (CONF-009) all depend on this choice.",
+      "type": "single_choice",
+      "options": [
+        "Retrofit + OkHttp + kotlinx.serialization converter",
+        "Retrofit + OkHttp + Moshi converter",
+        "Ktor Client with kotlinx.serialization (Compose-idiomatic, coroutine-native)",
+        "OkHttp direct calls with kotlinx.serialization and no Retrofit layer",
+        "Other"
+      ],
+      "recommended": "Retrofit + OkHttp + kotlinx.serialization converter",
+      "runner_up": "Ktor Client with kotlinx.serialization (Compose-idiomatic, coroutine-native)",
+      "affects_stack": true,
+      "alt_values": [
+        "Ktor Client with kotlinx.serialization (Compose-idiomatic, coroutine-native)",
+        "Retrofit + OkHttp + Moshi converter"
+      ]
+    },
+    {
+      "id": "Q-006",
+      "category": "missing_definition",
+      "question": "Which Android minSdk should the app target (the wizard leaves the recommended minimum unpinned)?",
+      "rationale": "The mobile delivery contract requires 'the supported recommended minimum' but records no API level, and the value must be pinned in app/build.gradle.kts. Jetpack Compose requires API 21+, and modern AndroidX/Compose tooling works best at 24+; the choice affects internal-test device coverage.",
+      "type": "single_choice",
+      "options": [
+        "minSdk 26 (Android 8.0) \u2014 modern baseline, covers most active devices",
+        "minSdk 24 (Android 7.0) \u2014 wider coverage, still safe with Compose",
+        "minSdk 29 (Android 10) \u2014 strictest, only if company devices are known-recent",
+        "minSdk 21 (Android 5.0) \u2014 maximum coverage, older support burden",
+        "Other"
+      ],
+      "recommended": "minSdk 26 (Android 8.0) \u2014 modern baseline, covers most active devices",
+      "runner_up": "minSdk 24 (Android 7.0) \u2014 wider coverage, still safe with Compose",
+      "affects_stack": true,
+      "alt_values": [
+        "24",
+        "29",
+        "21"
+      ]
+    },
+    {
+      "id": "Q-007",
+      "category": "assumption",
+      "question": "Should GET /api/incidents return all of the employee's incidents in v1, or support pagination?",
+      "rationale": "FUNC-003 and CONF-011 define only an optional status filter, newest-first; no page size, cursor, or offset is specified anywhere. Deciding now prevents an unplanned API-shape change later while keeping v1 simple.",
+      "type": "single_choice",
+      "options": [
+        "No pagination in v1 \u2014 return all owned incidents matching the filter, newest first",
+        "Server-side limit/offset (e.g. ?limit=50&offset=0) with total count in the response",
+        "No pagination in v1 but reserve query-parameter names (limit/offset) and document them",
+        "Cursor-based pagination keyed on created_at/id from the start",
+        "Other"
+      ],
+      "recommended": "No pagination in v1 \u2014 return all owned incidents matching the filter, newest first",
+      "runner_up": "No pagination in v1 but reserve query-parameter names (limit/offset) and document them",
+      "affects_stack": false,
+      "alt_values": []
+    },
+    {
+      "id": "Q-008",
+      "category": "assumption",
+      "question": "Does sign-out require server-side token invalidation, or is deleting the local token sufficient?",
+      "rationale": "FUNC-002 only mandates deleting the locally stored token, and CONF-001 mandates signed expiring tokens; if tokens remain valid server-side until expiry, a signed-out device's token still works if copied. This is a security posture decision the extractions leave ambiguous.",
+      "type": "single_choice",
+      "options": [
+        "Client-side deletion only \u2014 stateless JWT valid until expiry (matches FUNC-002 literally)",
+        "Client-side deletion plus short token TTL (e.g. 8h) accepted as the mitigation",
+        "Server-side revocation list (jti denylist in PostgreSQL checked on each request)",
+        "Stateless JWT with a token-version claim stored on the User row, bumped to invalidate all sessions",
+        "Other"
+      ],
+      "recommended": "Client-side deletion plus short token TTL (e.g. 8h) accepted as the mitigation",
+      "runner_up": "Client-side deletion only \u2014 stateless JWT valid until expiry (matches FUNC-002 literally)",
+      "affects_stack": false,
+      "alt_values": []
+    },
+    {
+      "id": "Q-009",
+      "category": "compatibility",
+      "question": "FastAPI 0.123.10 (pinned in the target plan, released Dec 5, 2025) is now a year behind the current 0.142.2 (Sep 30, 2026 per PyPI) \u2014 should the project keep the exact pin or move to the latest 0.142.x patch line?",
+      "rationale": "PyPI release history (checked Oct 2026) shows 0.123.10 as the final 0.123.x patch and 0.142.2 as current; both lines require Python >=3.10 and Pydantic v2, so either works with the pinned runtime, but 0.123.x receives no further fixes. The target plan is the source of truth, so staying put should be an explicit decision.",
+      "type": "single_choice",
+      "options": [
+        "Keep exactly FastAPI 0.123.10 as the target plan mandates",
+        "Use the latest 0.142.x (0.142.2) since the plan's '0.123.10' is a point-in-time snapshot",
+        "Keep 0.123.10 for v1 and add a tracked task to review the upgrade before any production rollout",
+        "Other"
+      ],
+      "recommended": "Keep exactly FastAPI 0.123.10 as the target plan mandates",
+      "runner_up": "Keep 0.123.10 for v1 and add a tracked task to review the upgrade before any production rollout",
+      "affects_stack": false,
+      "alt_values": []
+    },
+    {
+      "id": "Q-010",
+      "category": "compatibility",
+      "question": "Which password-hashing implementation should store password_hash, given that the common passlib+bcrypt pairing is broken?",
+      "rationale": "Verified via pyca/bcrypt issue #684 (open): passlib 1.7.4 \u2014 last released Oct 8, 2020 per PyPI \u2014 raises 'AttributeError: module bcrypt has no attribute __about__' with bcrypt 4.1+ (the FastAPI documentation's classic snippet). The project must hash with a maintained library directly.",
+      "type": "single_choice",
+      "options": [
+        "argon2-cffi (Argon2id \u2014 OWASP password-storage first choice, actively maintained)",
+        "bcrypt library used directly (no passlib), current 4.x",
+        "passlib 1.7.4 with bcrypt pinned < 4.1 (explicitly accepting an unmaintained stack)",
+        "PBKDF2-HMAC-SHA256 via hashlib (stdlib, no dependency)",
+        "Other"
+      ],
+      "recommended": "bcrypt library used directly (no passlib), current 4.x",
+      "runner_up": "argon2-cffi (Argon2id \u2014 OWASP password-storage first choice, actively maintained)",
+      "affects_stack": true,
+      "alt_values": [
+        "argon2-cffi (Argon2id \u2014 OWASP password-storage first choice, actively maintained)"
+      ]
+    },
+    {
+      "id": "Q-011",
+      "category": "compatibility",
+      "question": "Which JWT library should sign and validate the session tokens?",
+      "rationale": "PyPI (checked Sep/Oct 2026) shows PyJWT at 2.15.1 released Sep 28, 2026, production/stable, supporting Python 3.9+ including 3.10 \u2014 actively maintained. The alternative most FastAPI tutorials use, python-jose, has long gaps between releases, so the choice should be deliberate rather than copied from tutorials.",
+      "type": "single_choice",
+      "options": [
+        "PyJWT (actively released, 2.15.1) with HS256 and explicit algorithms allow-list on decode",
+        "python-jose (the older FastAPI tutorial standard)",
+        "Authlib (broader OAuth/JWS toolkit, heavier than needed for simple HS256)",
+        "python-jwt",
+        "Other"
+      ],
+      "recommended": "PyJWT (actively released, 2.15.1) with HS256 and explicit algorithms allow-list on decode",
+      "runner_up": "Authlib (broader OAuth/JWS toolkit, heavier than needed for simple HS256)",
+      "affects_stack": false,
+      "alt_values": []
+    },
+    {
+      "id": "Q-012",
+      "category": "compatibility",
+      "question": "Retrofit released a Kotlin-first 3.0.0 (May 2025 per Maven Central) after the 2.x line ended at 2.11.0 \u2014 which major version should the Android client adopt?",
+      "rationale": "Maven Central metadata for com.squareup.retrofit2:retrofit (fetched Oct 2026) shows latest/release 3.0.0 with 2.12.0 the last 2.x point release. Retrofit 3.0.0 is the going-forward line with built-in Kotlin support, but 2.11/2.12 remains battle-tested if maximum familiarity is preferred.",
+      "type": "single_choice",
+      "options": [
+        "Retrofit 3.0.0 (current release line, Kotlin-first) + OkHttp 5.x + kotlinx.serialization",
+        "Retrofit 2.12.0 (last 2.x point release, most tutorial coverage) + OkHttp 4.x",
+        "Skip Retrofit entirely \u2014 Ktor Client 3.x with kotlinx.serialization",
+        "Other"
+      ],
+      "recommended": "Retrofit 3.0.0 (current release line, Kotlin-first) + OkHttp 5.x + kotlinx.serialization",
+      "runner_up": "Skip Retrofit entirely \u2014 Ktor Client 3.x with kotlinx.serialization",
+      "affects_stack": true,
+      "alt_values": [
+        "Retrofit 2.12.0 (last 2.x point release, most tutorial coverage) + OkHttp 4.x"
+      ]
+    },
+    {
+      "id": "Q-013",
+      "category": "infrastructure",
+      "question": "Which Jetpack Compose BOM generation should the build pin, given the current BOM moves monthly?",
+      "rationale": "Google Maven metadata for androidx.compose:compose-bom (fetched Oct 2026) lists 2026.09.00 as the current release with the 2025.x line (through 2025.12.01) still available. Pinning an arbitrary older BOM loses stable fixes; pinning the newest couples the build to the bleeding edge, so the generation should be an explicit decision for a reproducible internal build.",
+      "type": "single_choice",
+      "options": [
+        "Latest stable BOM (2026.09.00) with a pinned lockfile-style version catalog",
+        "Last of the 2025 line (2025.12.01) \u2014 one year of stabilization",
+        "Whatever BOM ships with the Android Studio version used internally, documented in the design",
+        "Other"
+      ],
+      "recommended": "Latest stable BOM (2026.09.00) with a pinned lockfile-style version catalog",
+      "runner_up": "Last of the 2025 line (2025.12.01) \u2014 one year of stabilization",
+      "affects_stack": true,
+      "alt_values": [
+        "2025.12.01"
+      ]
+    }
+  ]
+}

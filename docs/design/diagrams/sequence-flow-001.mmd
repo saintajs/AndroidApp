@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant usr_employee as "Employee"
+    participant ui_app as "mobile-app (Compose)"
+    participant svc_api as "api (FastAPI)"
+    participant db_postgres as "PostgreSQL"
+    usr_employee->>ui_app: enter Correo electrónico and Contraseña on S-01 (BR-001 client validation)
+    ui_app->>svc_api: POST /api/auth/login body email password (button locked while in flight, BR-003)
+    svc_api->>db_postgres: SELECT users WHERE email = normalized trimmed lowercased email (INSTR-006)
+    db_postgres-->>svc_api: user row or none (bcrypt password_hash)
+    svc_api->>svc_api: verify password with bcrypt - never logged (INSTR-008)
+    alt valid credentials and active account
+        svc_api-->>ui_app: 200 access_token JWT HS256 token_type bearer expires_in_seconds 28800 (CONF-001)
+        Note over ui_app: token stored ONLY in Keystore-backed storage (CONF-002, BR-006)
+        opt profile for the S-02 subtitle
+            ui_app->>svc_api: GET /api/me Authorization Bearer JWT
+            svc_api-->>ui_app: 200 id email role active created_at - never password_hash (BR-026)
+        end
+        ui_app-->>usr_employee: navigate to S-02 Mis incidencias
+    else wrong password or nonexistent email - one uniform body (BR-002)
+        svc_api-->>ui_app: 401 detail Credenciales inválidas
+        ui_app-->>usr_employee: generic inline error on S-01
+    else failure budget exhausted per IP or per email (BR-007)
+        svc_api-->>ui_app: 429 detail Demasiados intentos. Inténtelo de nuevo más tarde. + Retry-After header
+    else missing or malformed fields
+        svc_api-->>ui_app: 422 field-level detail list
+        ui_app-->>usr_employee: Spanish per-field errors next to each field (INSTR-011)
+    end
+    Note over usr_employee,db_postgres: FLOW-001 - rate limiting is uniform whether or not the email exists (BR-007)

@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant usr_employee as "Employee"
+    participant ui_app as "mobile-app (Compose)"
+    participant svc_api as "api (FastAPI)"
+    participant db_postgres as "PostgreSQL"
+    usr_employee->>ui_app: tap FAB + on S-02 - open S-03
+    usr_employee->>ui_app: fill Título (5-100), Categoría, Prioridad, Descripción (10-1000) with live validation (BR-013, BR-014, BR-015, BR-016)
+    usr_employee->>ui_app: tap Guardar incidencia - locks to Guardando… (BR-018)
+    ui_app->>svc_api: POST /api/incidents body title description category priority - Authorization Bearer JWT
+    Note over svc_api: schema extra=forbid - no status owner_id id fields accepted (INSTR-002)
+    alt valid body
+        svc_api->>db_postgres: INSERT incidents owner_id = token subject, status pending, created_at = updated_at (INSTR-001, BR-011)
+        svc_api->>db_postgres: INSERT initial incident_history with previous_status NULL (INSTR-005)
+        db_postgres-->>svc_api: committed
+        svc_api-->>ui_app: 201 created incident with status pending
+        ui_app-->>usr_employee: return to S-02 - new Pendiente card first in list (BR-019)
+    else validation failure (BR-013..016 or forbidden extra field)
+        svc_api-->>ui_app: 422 field-level detail list - no partial incident (INSTR-011)
+        ui_app-->>usr_employee: errors rendered next to each field
+    else token expired or invalid
+        svc_api-->>ui_app: 401 detail No autenticado
+        Note over ui_app: expired-token recovery flow takes over - clear token, route S-01
+    else network failure
+        Note over ui_app: form data kept - recoverable error state with retry - app never crashes (CONF-009)
+    end

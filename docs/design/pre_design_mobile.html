@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniSoporte</title>
+<script type="application/json" id="design-tokens">
+{"colors": {"primary": "#1E3A2A", "secondary": "#EFC64E", "background": "#F5F7F5", "text": "#1C2B22", "muted": "#5C6B62", "border": "#DDE4DF", "surface": "#FFFFFF"}, "fonts": {"body": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif", "heading": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif"}, "spacing": {"unit": "8px"}}
+</script>
+<style>
+  :root {
+    /* Brand palette mandated by INSTR-012 (extraction source of truth) */
+    --color-primary: #1E3A2A;
+    --color-primary-hover: #2A4E39;
+    --color-accent: #EFC64E;
+    --color-accent-soft: #FBF1D4;
+    --color-background: #F5F7F5;
+    --color-surface: #FFFFFF;
+    --color-text: #1C2B22;
+    --color-muted: #5C6B62;
+    --color-border: #DDE4DF;
+    --color-danger: #B3261E;
+    --color-danger-soft: #FBEAE9;
+
+    /* Status colors — always paired with a text label (INSTR-012: never color alone) */
+    --status-pending-bg: #FBF1D4;
+    --status-pending-fg: #7A5B10;
+    --status-progress-bg: #E1EAF6;
+    --status-progress-fg: #2A4E79;
+    --status-resolved-bg: #DFEFE3;
+    --status-resolved-fg: #1E5B36;
+
+    --font-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+
+    /* Spacing on an 8px grid (INSTR-012) */
+    --space-unit: 8px;
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+
+    /* 8-pixel corners (INSTR-012) */
+    --radius: 8px;
+    --radius-sm: 8px;
+
+    --shadow-card: 0 1px 2px rgba(30, 58, 42, 0.08), 0 2px 8px rgba(30, 58, 42, 0.06);
+    --shadow-raised: 0 4px 16px rgba(30, 58, 42, 0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--color-background);
+    color: var(--color-text);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    width: 100%;
+    max-width: none;
+    background: var(--color-background);
+    position: relative;
+  }
+
+  .screen {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
+
+  /* ---------- Top app bar ---------- */
+  .appbar {
+    background: var(--color-primary);
+    color: #FFFFFF;
+    padding: var(--space-2) var(--space-2);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex-shrink: 0;
+  }
+  .appbar .appbar-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .appbar .appbar-sub {
+    font-size: 12px;
+    opacity: 0.85;
+    font-weight: 400;
+    display: block;
+    margin-top: 2px;
+  }
+  .appbar .brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius);
+    background: var(--color-accent);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .appbar-btn {
+    background: rgba(255,255,255,0.12);
+    color: #FFFFFF;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 40px;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+  }
+  .appbar-btn:hover { background: rgba(255,255,255,0.22); }
+  .appbar-btn:active { background: rgba(255,255,255,0.3); }
+
+  .back-btn {
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 8px 8px 0;
+    min-height: 40px;
+    flex-shrink: 0;
+  }
+  .back-btn svg { display: block; }
+
+  /* ---------- Scrollable content ---------- */
+  .content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-2);
+    width: 100%;
+  }
+
+  /* ---------- Sign-in ---------- */
+  #screen-login {
+    background: var(--color-background);
+  }
+  .login-hero {
+    background: var(--color-primary);
+    color: #FFFFFF;
+    padding: var(--space-4) var(--space-3) var(--space-3);
+    flex-shrink: 0;
+  }
+  .login-hero .brand-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
+  }
+  .login-hero .brand-mark { width: 40px; height: 40px; font-size: 18px; }
+  .login-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+  }
+  .login-hero p {
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    max-width: 34ch;
+  }
+  .login-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-2);
+  }
+  .login-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-3);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .login-card h2 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+  }
+
+  .demo-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: var(--color-accent-soft);
+    border: 1px solid var(--color-accent);
+    color: #6B5312;
+    border-radius: var(--radius);
+    padding: 10px var(--space-1);
+    font-size: 13px;
+    margin-bottom: var(--space-2);
+  }
+  .demo-hint strong { font-weight: 700; }
+  .demo-hint code {
+    background: rgba(239, 198, 78, 0.25);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12.5px;
+  }
+
+  .field { margin-bottom: var(--space-2); }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 6px;
+  }
+  .field label .req { color: var(--color-danger); }
+  .field input, .field textarea {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 12px;
+    min-height: 48px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field textarea { resize: vertical; min-height: 112px; }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(30, 58, 42, 0.15);
+  }
+  .field.invalid input, .field.invalid textarea {
+    border-color: var(--color-danger);
+    background: var(--color-danger-soft);
+  }
+  .field-error {
+    display: none;
+    color: var(--color-danger);
+    font-size: 12.5px;
+    margin-top: 6px;
+  }
+  .field.invalid .field-error { display: block; }
+  .char-counter {
+    font-size: 12px;
+    color: var(--color-muted);
+    text-align: right;
+    margin-top: 4px;
+  }
+  .char-counter.over { color: var(--color-danger); font-weight: 600; }
+  .field-hint { font-size: 12px; color: var(--color-muted); margin-top: 4px; }
+
+  .login-error {
+    display: none;
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+    border-radius: var(--radius);
+    padding: 10px var(--space-1);
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: var(--space-2);
+  }
+  .login-error.visible { display: block; }
+
+  /* ---------- Buttons ---------- */
+  .btn-primary {
+    width: 100%;
+    background: var(--color-primary);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px var(--space-2);
+    min-height: 48px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.05s ease;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+  .btn-primary:active:not(:disabled) { transform: scale(0.99); }
+  .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* ---------- Filter chips ---------- */
+  .chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 0 var(--space-2);
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 40px;
+    transition: all 0.15s ease;
+  }
+  .chip .count {
+    background: var(--color-background);
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    color: var(--color-muted);
+  }
+  .chip:hover { border-color: var(--color-primary); }
+  .chip.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #FFFFFF;
+  }
+  .chip.active .count {
+    background: rgba(255,255,255,0.2);
+    color: #FFFFFF;
+  }
+
+  /* ---------- Incident cards ---------- */
+  .incident-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .incident-card {
+    width: 100%;
+    text-align: left;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-2);
+    cursor: pointer;
+    font-family: var(--font-body);
+    display: block;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+  }
+  .incident-card:hover { border-color: var(--color-primary); box-shadow: var(--shadow-raised); }
+  .incident-card:active { transform: scale(0.995); }
+  .incident-card .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-1);
+    margin-bottom: 6px;
+  }
+  .incident-card .card-title {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.35;
+    min-width: 0;
+  }
+  .incident-card .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--color-muted);
+    margin-top: 8px;
+  }
+  .meta-dot { color: var(--color-border); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .badge.pending { background: var(--status-pending-bg); color: var(--status-pending-fg); }
+  .badge.pending .dot { background: var(--status-pending-fg); }
+  .badge.in_progress { background: var(--status-progress-bg); color: var(--status-progress-fg); }
+  .badge.in_progress .dot { background: var(--status-progress-fg); }
+  .badge.resolved { background: var(--status-resolved-bg); color: var(--status-resolved-fg); }
+  .badge.resolved .dot { background: var(--status-resolved-fg); }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-muted);
+    padding: 2px 9px;
+    white-space: nowrap;
+  }
+  .pill.high { border-color: #C4463E; color: #A32E27; }
+  .pill.medium { border-color: #B98A1E; color: #7A5B10; }
+  .pill.low { border-color: #6B8F7A; color: #446B54; }
+
+  /* ---------- Empty / error states ---------- */
+  .state-box {
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius);
+    text-align: center;
+    padding: var(--space-4) var(--space-3);
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+  .state-box .state-icon { font-size: 32px; margin-bottom: var(--space-1); }
+  .state-box .state-title {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 4px;
+  }
+  .btn-retry {
+    margin-top: var(--space-2);
+    background: var(--color-surface);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px var(--space-3);
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .btn-retry:hover { background: var(--color-primary); color: #FFFFFF; }
+
+  /* ---------- New incident form ---------- */
+  .form-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-2);
+  }
+  .choice-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .choice {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 9px 14px;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    min-height: 40px;
+    transition: all 0.15s ease;
+  }
+  .choice:hover { border-color: var(--color-primary); }
+  .choice.selected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #FFFFFF;
+  }
+
+  /* ---------- Detail ---------- */
+  .detail-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+  .detail-card .detail-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-1);
+    margin-bottom: var(--space-1);
+  }
+  .detail-card h2 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .incident-id {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-muted);
+    letter-spacing: 0.3px;
+    margin-bottom: var(--space-1);
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-1);
+    padding: 10px 0;
+    border-top: 1px solid var(--color-border);
+    font-size: 14px;
+  }
+  .detail-row .dt {
+    color: var(--color-muted);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .detail-row .dd { text-align: right; font-weight: 500; }
+  .detail-desc {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-1);
+    font-size: 14.5px;
+    color: var(--color-text);
+    white-space: pre-wrap;
+  }
+  .detail-desc .dt {
+    display: block;
+    color: var(--color-muted);
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  /* ---------- Status history timeline ---------- */
+  .section-title {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: var(--space-1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .badge { font-size: 11.5px; }
+  .timeline { list-style: none; }
+  .timeline li {
+    position: relative;
+    padding: 0 0 var(--space-2) var(--space-3);
+    border-left: 2px solid var(--color-border);
+    margin-left: 7px;
+  }
+  .timeline li:last-child { border-left-color: transparent; padding-bottom: 4px; }
+  .timeline .t-dot {
+    position: absolute;
+    left: -8px;
+    top: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--color-surface);
+    box-shadow: 0 0 0 2px var(--color-border);
+    background: var(--color-muted);
+  }
+  .timeline li.latest .t-dot { background: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary); }
+  .timeline .t-status {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  .timeline .t-status .arrow { color: var(--color-muted); font-weight: 400; }
+  .timeline .t-meta {
+    font-size: 12.5px;
+    color: var(--color-muted);
+    margin-top: 2px;
+  }
+
+  /* ---------- Bottom navigation ---------- */
+  .bottomnav {
+    flex-shrink: 0;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    padding: 4px 0 max(4px, env(safe-area-inset-bottom));
+  }
+  .nav-item {
+    flex: 1;
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--color-muted);
+    padding: 8px 0 6px;
+    cursor: pointer;
+    min-height: 56px;
+    transition: color 0.15s ease;
+  }
+  .nav-item svg { display: block; }
+  .nav-item.active { color: var(--color-primary); }
+  .nav-item:hover { color: var(--color-primary); }
+
+  .nav-fab-wrap { position: relative; flex: 1; }
+  .nav-fab {
+    position: absolute;
+    left: 50%;
+    top: -22px;
+    transform: translateX(-50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid var(--color-background);
+    background: var(--color-accent);
+    color: var(--color-primary);
+    font-size: 26px;
+    line-height: 1;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-raised);
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+  .nav-fab:hover { background: #F3D06A; }
+  .nav-fab:active { transform: translateX(-50%) scale(0.94); }
+  .nav-fab-wrap .nav-label-fab {
+    margin-top: 34px;
+  }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 96px;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--color-primary);
+    color: #FFFFFF;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-raised);
+    padding: 12px var(--space-2);
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 60;
+    max-width: min(90vw, 420px);
+    text-align: center;
+  }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= S-01 · Iniciar sesión ================= -->
+  <section class="screen active" id="screen-login" aria-label="Iniciar sesión">
+    <div class="login-hero">
+      <div class="brand-row">
+        <div class="brand-mark">M</div>
+        <h1>MiniSoporte</h1>
+      </div>
+      <p>Reporta y consulta incidencias internas de sistemas, equipos y acceso.</p>
+    </div>
+    <div class="login-body">
+      <div class="login-card">
+        <h2>Iniciar sesión</h2>
+        <div class="demo-hint" role="note">
+          <span aria-hidden="true">🔑</span>
+          <span>Demo: <strong>admin / admin</strong></span>
+        </div>
+        <div class="login-error" id="login-error" role="alert">
+          Credenciales inválidas. Verifica tus datos e inténtalo de nuevo.
+        </div>
+        <form id="login-form" novalidate>
+          <div class="field" id="f-login-email">
+            <label for="login-email">Correo electrónico <span class="req">*</span></label>
+            <input type="text" id="login-email" name="email" autocomplete="username" placeholder="Correo corporativo">
+            <div class="field-error">Ingresa tu correo electrónico.</div>
+          </div>
+          <div class="field" id="f-login-password">
+            <label for="login-password">Contraseña <span class="req">*</span></label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="Tu contraseña">
+            <div class="field-error">Ingresa tu contraseña.</div>
+          </div>
+          <button type="submit" class="btn-primary" id="login-submit">Iniciar sesión</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-02 · Mis incidencias ================= -->
+  <section class="screen" id="screen-list" aria-label="Mis incidencias">
+    <header class="appbar">
+      <div class="brand-mark" aria-hidden="true">M</div>
+      <div class="appbar-title">
+        Mis incidencias
+        <span class="appbar-sub" id="user-email">empleado@minisoporte.test</span>
+      </div>
+      <button class="appbar-btn" id="btn-signout" type="button">Salir</button>
+    </header>
+    <div class="content">
+      <div class="chips" id="filter-chips" role="tablist" aria-label="Filtrar por estado"></div>
+      <div class="incident-list" id="incident-list"></div>
+    </div>
+    <nav class="bottomnav" aria-label="Navegación principal">
+      <button class="nav-item active" data-nav="list" type="button" aria-current="page">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
+        Mis incidencias
+      </button>
+      <div class="nav-fab-wrap">
+        <button class="nav-fab" id="fab-new" type="button" aria-label="Nueva incidencia">+</button>
+        <span class="nav-item nav-label-fab" aria-hidden="true">Nueva</span>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ================= S-03 · Nueva incidencia ================= -->
+  <section class="screen" id="screen-new" aria-label="Nueva incidencia">
+    <header class="appbar">
+      <button class="back-btn" id="btn-back-list" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        Volver
+      </button>
+      <div class="appbar-title">Nueva incidencia</div>
+    </header>
+    <div class="content">
+      <form class="form-card" id="new-form" novalidate>
+        <div class="field" id="f-title">
+          <label for="in-title">Título <span class="req">*</span></label>
+          <input type="text" id="in-title" maxlength="100" placeholder="Describe brevemente el problema">
+          <div class="field-error">El título debe tener entre 5 y 100 caracteres.</div>
+          <div class="char-counter" id="counter-title">0 / 100</div>
+        </div>
+        <div class="field" id="f-category">
+          <label id="lbl-category">Categoría <span class="req">*</span></label>
+          <div class="choice-group" id="group-category" role="radiogroup" aria-labelledby="lbl-category">
+            <button type="button" class="choice" data-value="sistemas">Sistemas</button>
+            <button type="button" class="choice" data-value="equipos">Equipos</button>
+            <button type="button" class="choice" data-value="acceso">Acceso</button>
+            <button type="button" class="choice" data-value="otro">Otro</button>
+          </div>
+          <div class="field-error">Selecciona una categoría.</div>
+        </div>
+        <div class="field" id="f-priority">
+          <label id="lbl-priority">Prioridad <span class="req">*</span></label>
+          <div class="choice-group" id="group-priority" role="radiogroup" aria-labelledby="lbl-priority">
+            <button type="button" class="choice" data-value="baja">Baja</button>
+            <button type="button" class="choice" data-value="media">Media</button>
+            <button type="button" class="choice" data-value="alta">Alta</button>
+          </div>
+          <div class="field-error">Selecciona una prioridad.</div>
+        </div>
+        <div class="field" id="f-description">
+          <label for="in-description">Descripción <span class="req">*</span></label>
+          <textarea id="in-description" maxlength="1000" placeholder="Explica qué ocurre, desde cuándo y qué has intentado"></textarea>
+          <div class="field-error">La descripción debe tener entre 10 y 1.000 caracteres.</div>
+          <div class="char-counter" id="counter-desc">0 / 1000</div>
+        </div>
+        <div class="field-hint" style="margin-bottom:16px;">La incidencia se creará en estado <strong>Pendiente</strong>.</div>
+        <button type="submit" class="btn-primary" id="new-submit">Guardar incidencia</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= S-04 · Detalle de incidencia ================= -->
+  <section class="screen" id="screen-detail" aria-label="Detalle de incidencia">
+    <header class="appbar">
+      <button class="back-btn" id="btn-back-to-list" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        Mis incidencias
+      </button>
+      <div class="appbar-title">Detalle</div>
+    </header>
+    <div class="content" id="detail-content"><!-- rendered by JS --></div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- Domain data (demo seed, mirrors FUNC-009) ---------------- */
+
+  var CATEGORY_LABELS = { sistemas: 'Sistemas', equipos: 'Equipos', acceso: 'Acceso', otro: 'Otro' };
+  var PRIORITY_LABELS = { baja: 'Baja', media: 'Media', alta: 'Alta' };
+  var STATUS_LABELS = { pendiente: 'Pendiente', en_progreso: 'En progreso', resuelta: 'Resuelta' };
+  var FILTERS = [
+    { key: 'todas', label: 'Todas' },
+    { key: 'pendiente', label: 'Pendiente' },
+    { key: 'en_progreso', label: 'En progreso' },
+    { key: 'resuelta', label: 'Resuelta' }
+  ];
+
+  function fmtDate(iso) {
+    var d = new Date(iso);
+    var months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function shortId(uuid) { return uuid.slice(0, 8); }
+
+  var incidents = [
+    {
+      id: '9f2c41a7-3e8d-4b6a-9c1f-7d20e5aa4b31',
+      title: 'No puedo acceder al sistema de facturación',
+      description: 'Desde ayer por la tarde el sistema de facturación rechaza mi usuario con un mensaje de acceso denegado. Necesito revisar las facturas pendientes del cierre mensual.',
+      category: 'acceso',
+      priority: 'alta',
+      status: 'pendiente',
+      createdAt: '2026-10-29T09:12:00',
+      history: [
+        { previous: null, next: 'pendiente', changedAt: '2026-10-29T09:12:00', actor: 'empleado@minisoporte.test' }
+      ]
+    },
+    {
+      id: '5b8e0d32-91cf-4a57-b2e4-08c6f31d9e74',
+      title: 'La impresora del área de ventas no responde',
+      description: 'La impresora compartida de ventas aparece como sin conexión desde el lunes. Ya reinicié el equipo y revisé los cables sin éxito. Estamos imprimiendo los pedidos en otra planta.',
+      category: 'equipos',
+      priority: 'media',
+      status: 'en_progreso',
+      createdAt: '2026-10-28T11:40:00',
+      history: [
+        { previous: null, next: 'pendiente', changedAt: '2026-10-28T11:40:00', actor: 'empleado@minisoporte.test' },
+        { previous: 'pendiente', next: 'en_progreso', changedAt: '2026-10-29T08:05:00', actor: 'soporte@minisoporte.test' }
+      ]
+    },
+    {
+      id: 'c47a92be-60f3-4d18-8ab9-3e5f70c2d1a6',
+      title: 'El correo corporativo no sincroniza en mi equipo',
+      description: 'La app de correo lleva dos días sin bajar mensajes nuevos en el portátil. En el móvil sí funciona. Reinicié la sesión y volví a configurar la cuenta y siguió igual.',
+      category: 'sistemas',
+      priority: 'baja',
+      status: 'resuelta',
+      createdAt: '2026-10-20T16:25:00',
+      history: [
+        { previous: null, next: 'pendiente', changedAt: '2026-10-20T16:25:00', actor: 'empleado@minisoporte.test' },
+        { previous: 'pendiente', next: 'en_progreso', changedAt: '2026-10-21T09:30:00', actor: 'soporte@minisoporte.test' },
+        { previous: 'en_progreso', next: 'resuelta', changedAt: '2026-10-22T13:10:00', actor: 'soporte@minisoporte.test' }
+      ]
+    }
+  ];
+
+  /* ---------------- State ---------------- */
+
+  var state = {
+    authed: false,
+    filter: 'todas',
+    detailId: null,
+    submitting: false,
+    touched: { title: false, description: false, category: false, priority: false },
+    form: { category: null, priority: null }
+  };
+
+  /* ---------------- Helpers ---------------- */
+
+  function $(sel) { return document.querySelector(sel); }
+  function el(id) { return document.getElementById(id); }
+
+  function showScreen(name) {
+    var screens = document.querySelectorAll('.screen');
+    for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+    el('screen-' + name).classList.add('active');
+    var nav = document.querySelector('.nav-item[data-nav]');
+    if (nav) nav.parentElement.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+    document.querySelectorAll('.bottomnav .nav-item').forEach(function (n) {
+      n.classList.toggle('active', n.getAttribute('data-nav') === name);
+    });
+    var content = el('screen-' + name).querySelector('.content, .login-body');
+    if (content) content.scrollTop = 0;
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = el('toast');
+    t.textContent = msg;
+    t.classList.add('visible');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('visible'); }, 2600);
+  }
+
+  function statusBadge(status) {
+    return '<span class="badge ' + status + '"><span class="dot" aria-hidden="true"></span>' + STATUS_LABELS[status] + '</span>';
+  }
+
+  function priorityPill(priority) {
+    var cls = priority === 'alta' ? 'high' : (priority === 'media' ? 'medium' : 'low');
+    return '<span class="pill ' + cls + '">Prioridad ' + PRIORITY_LABELS[priority] + '</span>';
+  }
+
+  function getIncident(id) {
+    for (var i = 0; i < incidents.length; i++) if (incidents[i].id === id) return incidents[i];
+    return null;
+  }
+
+  /* ---------------- Sign-in (demo: admin / admin) ---------------- */
+
+  var loginForm = el('login-form');
+  var loginSubmit = el('login-submit');
+
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = el('login-email').value.trim();
+    var pass = el('login-password').value;
+    el('login-error').classList.remove('visible');
+
+    var missing = false;
+    el('f-login-email').classList.toggle('invalid', !email);
+    el('f-login-password').classList.toggle('invalid', !pass);
+    if (!email || !pass) return;
+
+    // Simulated request: button disabled while processing (FUNC-001).
+    loginSubmit.disabled = true;
+    loginSubmit.textContent = 'Verificando…';
+    setTimeout(function () {
+      loginSubmit.disabled = false;
+      loginSubmit.textContent = 'Iniciar sesión';
+      if (email === 'admin' && pass === 'admin') {
+        state.authed = true;
+        el('login-error').classList.remove('visible');
+        el('login-email').value = '';
+        el('login-password').value = '';
+        renderList();
+        showScreen('list');
+      } else {
+        // Generic message: never reveals whether the account exists (FUNC-001).
+        el('login-error').classList.add('visible');
+      }
+    }, 600);
+  });
+
+  el('btn-signout').addEventListener('click', function () {
+    state.authed = false;
+    state.filter = 'todas';
+    showScreen('login');
+    toast('Sesión cerrada');
+  });
+
+  /* ---------------- Incident list + status filter (FUNC-003, FUNC-004) ---------------- */
+
+  function counts() {
+    var c = { todas: incidents.length, pendiente: 0, en_progreso: 0, resuelta: 0 };
+    incidents.forEach(function (i) { c[i.status]++; });
+    return c;
+  }
+
+  function renderChips() {
+    var c = counts();
+    var html = '';
+    FILTERS.forEach(function (f) {
+      html += '<button type="button" role="tab" aria-selected="' + (state.filter === f.key) + '" ' +
+        'class="chip' + (state.filter === f.key ? ' active' : '') + '" data-filter="' + f.key + '">' +
+        f.label + ' <span class="count">' + c[f.key] + '</span></button>';
+    });
+    el('filter-chips').innerHTML = html;
+  }
+
+  function renderList() {
+    renderChips();
+    var list = incidents.filter(function (i) {
+      return state.filter === 'todas' || i.status === state.filter;
+    });
+
+    if (list.length === 0) {
+      el('incident-list').innerHTML =
+        '<div class="state-box">' +
+        '<div class="state-icon" aria-hidden="true">🗂️</div>' +
+        '<div class="state-title">Sin incidencias</div>' +
+        'No tienes incidencias en este estado.<br>Crea una nueva con el botón “+”.</div>';
+      return;
+    }
+
+    var html = '';
+    list.forEach(function (i) {
+      html +=
+        '<button type="button" class="incident-card" data-id="' + i.id + '">' +
+        '<div class="card-top"><span class="card-title">' + escapeHtml(i.title) + '</span>' + statusBadge(i.status) + '</div>' +
+        '<div class="card-meta">' +
+        '<span class="pill">' + CATEGORY_LABELS[i.category] + '</span>' +
+        priorityPill(i.priority) +
+        '<span>Creada el ' + fmtDate(i.createdAt) + '</span>' +
+        '</div></button>';
+    });
+    el('incident-list').innerHTML = html;
+  }
+
+  el('filter-chips').addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip');
+    if (!chip) return;
+    state.filter = chip.getAttribute('data-filter');
+    renderList();
+  });
+
+  el('incident-list').addEventListener('click', function (e) {
+    var card = e.target.closest('.incident-card');
+    if (!card) return;
+    state.detailId = card.getAttribute('data-id');
+    renderDetail();
+    showScreen('detail');
+  });
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+
+  /* ---------------- New incident form (FUNC-005) ---------------- */
+
+  var titleInput = el('in-title');
+  var descInput = el('in-description');
+
+  function validTitle() { var v = titleInput.value.trim(); return v.length >= 5 && v.length <= 100; }
+  function validDesc() { var v = descInput.value.trim(); return v.length >= 10 && v.length <= 1000; }
+
+  function updateCounter(input, counter, max) {
+    var len = input.value.trim().length;
+    counter.textContent = len + ' / ' + max;
+    counter.classList.toggle('over', len > max);
+  }
+
+  function refreshField(fieldWrapId, isValid, touched) {
+    var wrap = el(fieldWrapId);
+    wrap.classList.toggle('invalid', touched && !isValid);
+  }
+
+  titleInput.addEventListener('input', function () {
+    updateCounter(titleInput, el('counter-title'), 100);
+    if (state.touched.title) refreshField('f-title', validTitle(), true);
+  });
+  titleInput.addEventListener('blur', function () {
+    state.touched.title = true;
+    refreshField('f-title', validTitle(), true);
+  });
+
+  descInput.addEventListener('input', function () {
+    updateCounter(descInput, el('counter-desc'), 1000);
+    if (state.touched.description) refreshField('f-description', validDesc(), true);
+  });
+  descInput.addEventListener('blur', function () {
+    state.touched.description = true;
+    refreshField('f-description', validDesc(), true);
+  });
+
+  function bindChoiceGroup(groupId, key, fieldId) {
+    el(groupId).addEventListener('click', function (e) {
+      var btn = e.target.closest('.choice');
+      if (!btn) return;
+      state.form[key] = btn.getAttribute('data-value');
+      state.touched[key] = true;
+      el(groupId).querySelectorAll('.choice').forEach(function (b) {
+        b.classList.toggle('selected', b === btn);
+      });
+      el(fieldId).classList.remove('invalid');
+    });
+  }
+  bindChoiceGroup('group-category', 'category', 'f-category');
+  bindChoiceGroup('group-priority', 'priority', 'f-priority');
+
+  function resetForm() {
+    el('new-form').reset();
+    state.form = { category: null, priority: null };
+    state.touched = { title: false, description: false, category: false, priority: false };
+    el('counter-title').textContent = '0 / 100';
+    el('counter-desc').textContent = '0 / 1000';
+    el('counter-title').classList.remove('over');
+    el('counter-desc').classList.remove('over');
+    document.querySelectorAll('#new-form .field').forEach(function (f) { f.classList.remove('invalid'); });
+    document.querySelectorAll('#new-form .choice').forEach(function (b) { b.classList.remove('selected'); });
+  }
+
+  el('new-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (state.submitting) return; // prevent duplicate submissions (FUNC-005)
+
+    state.touched = { title: true, description: true, category: true, priority: true };
+    var okT = validTitle(), okD = validDesc(), okC = !!state.form.category, okP = !!state.form.priority;
+    refreshField('f-title', okT, true);
+    refreshField('f-description', okD, true);
+    el('f-category').classList.toggle('invalid', !okC);
+    el('f-priority').classList.toggle('invalid', !okP);
+
+    if (!(okT && okD && okC && okP)) {
+      var firstInvalid = document.querySelector('#new-form .field.invalid input, #new-form .field.invalid textarea, #new-form .field.invalid');
+      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    state.submitting = true;
+    var submit = el('new-submit');
+    submit.disabled = true;
+    submit.textContent = 'Guardando…';
+    setTimeout(function () {
+      var now = new Date();
+      var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+      var iso = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+        'T' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':00';
+      var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      incidents.unshift({
+        id: uuid,
+        title: titleInput.value.trim(),
+        description: descInput.value.trim(),
+        category: state.form.category,
+        priority: state.form.priority,
+        status: 'pendiente', // every new incident starts Pending (INSTR-002)
+        createdAt: iso,
+        history: [{ previous: null, next: 'pendiente', changedAt: iso, actor: 'empleado@minisoporte.test' }]
+      });
+      state.submitting = false;
+      submit.disabled = false;
+      submit.textContent = 'Guardar incidencia';
+      resetForm();
+      state.filter = 'todas';
+      renderList();
+      showScreen('list');
+      toast('Incidencia creada en estado Pendiente');
+    }, 600);
+  });
+
+  /* ---------------- Detail + status history (FUNC-006) ---------------- */
+
+  function renderDetail() {
+    var inc = getIncident(state.detailId);
+    if (!inc) {
+      // Safe result for a missing id: no leaked information (FUNC-006).
+      el('detail-content').innerHTML =
+        '<div class="state-box"><div class="state-icon" aria-hidden="true">🔒</div>' +
+        '<div class="state-title">Incidencia no disponible</div>' +
+        'No se encontró la incidencia o no tienes acceso a ella.</div>';
+      return;
+    }
+    var historyHtml = '';
+    for (var i = inc.history.length - 1; i >= 0; i--) { // newest change first
+      var h = inc.history[i];
+      var line = h.previous
+        ? STATUS_LABELS[h.previous] + ' <span class="arrow">→</span> ' + STATUS_LABELS[h.next]
+        : 'Creación — ' + STATUS_LABELS[h.next];
+      historyHtml +=
+        '<li' + (i === inc.history.length - 1 ? ' class="latest"' : '') + '>' +
+        '<span class="t-dot" aria-hidden="true"></span>' +
+        '<div class="t-status">' + line + '</div>' +
+        '<div class="t-meta">' + fmtDate(h.changedAt) + ' · ' + escapeHtml(h.actor) + '</div>' +
+        '</li>';
+    }
+    el('detail-content').innerHTML =
+      '<div class="detail-card">' +
+      '<div class="incident-id">ID ' + inc.id + '</div>' +
+      '<div class="detail-head"><h2>' + escapeHtml(inc.title) + '</h2>' + statusBadge(inc.status) + '</div>' +
+      '<div class="detail-desc"><span class="dt">Descripción</span>' + escapeHtml(inc.description) + '</div>' +
+      '<div style="height:16px"></div>' +
+      '<div class="detail-row"><span class="dt">Categoría</span><span class="dd">' + CATEGORY_LABELS[inc.category] + '</span></div>' +
+      '<div class="detail-row"><span class="dt">Prioridad</span><span class="dd">' + PRIORITY_LABELS[inc.priority] + '</span></div>' +
+      '<div class="detail-row"><span class="dt">Estado</span><span class="dd">' + STATUS_LABELS[inc.status] + '</span></div>' +
+      '<div class="detail-row"><span class="dt">Fecha de creación</span><span class="dd">' + fmtDate(inc.createdAt) + '</span></div>' +
+      '</div>' +
+      '<h3 class="section-title">Historial de estados</h3>' +
+      '<div class="detail-card"><ul class="timeline">' + historyHtml + '</ul></div>';
+  }
+
+  /* ---------------- Navigation ---------------- */
+
+  el('fab-new').addEventListener('click', function () {
+    resetForm();
+    showScreen('new');
+  });
+  el('btn-back-list').addEventListener('click', function () { renderList(); showScreen('list'); });
+  el('btn-back-to-list').addEventListener('click', function () { renderList(); showScreen('list'); });
+
+  document.querySelectorAll('.bottomnav .nav-item[data-nav]').forEach(function (n) {
+    n.addEventListener('click', function () {
+      renderList();
+      showScreen('list');
+    });
+  });
+
+  /* ---------------- Initial render ---------------- */
+  renderList();
+})();
+</script>
+</body>
+</html>

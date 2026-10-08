@@ -1,0 +1,258 @@
+{
+  "key": "architecture-mobile-app",
+  "edges": {
+    "cmp_okhttp->svc_api": [
+      {
+        "artifact": "Android app \u2194 REST API (first-party, internal)",
+        "section_file": "external-integrations.md"
+      }
+    ],
+    "cmp_okhttp->cmp_keystore": [
+      {
+        "artifact": "BR-006",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_theme->cmp_incidents_screen": [
+      {
+        "artifact": "BR-036",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "cmp_detail_screen->cmp_repository_iface": [
+      {
+        "artifact": "GET /api/incidents/{id}",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "cmp_signin_screen->cmp_repository_iface": [
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      }
+    ],
+    "cmp_incidents_screen->cmp_repository_iface": [
+      {
+        "artifact": "GET /api/incidents",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "GET /api/incidents/{id}",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "cmp_new_incident_screen->cmp_repository_iface": [
+      {
+        "artifact": "POST /api/incidents",
+        "section_file": "api-contract.md"
+      },
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ]
+  },
+  "nodes": {
+    "sg_ui": {
+      "kind": "component",
+      "label": "UI - Jetpack Compose",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_nav": {
+      "kind": "component",
+      "label": "Navigation graph - navigation-compose typed routes",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "svc_api": {
+      "kind": "service",
+      "label": "api - FastAPI 0.123.10 / Python 3.10",
+      "source": [
+        {
+          "artifact": "api",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_dtos": {
+      "kind": "component",
+      "label": "kotlinx.serialization DTOs - snake_case @SerialName",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_theme": {
+      "kind": "component",
+      "label": "Theme - design tokens (BR-036)",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-036",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_okhttp": {
+      "kind": "component",
+      "label": "OkHttp 5.5.0 - bearer-token interceptor + timeouts",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_network": {
+      "kind": "component",
+      "label": "Network",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_security": {
+      "kind": "component",
+      "label": "Security",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_keystore": {
+      "kind": "component",
+      "label": "Keystore-backed token storage (CONF-002, BR-006)",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        },
+        {
+          "artifact": "BR-006",
+          "section_file": "business-rules.md"
+        }
+      ]
+    },
+    "cmp_retrofit": {
+      "kind": "component",
+      "label": "Retrofit 3.0.0 - converter-kotlinx-serialization",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_fake_repo": {
+      "kind": "component",
+      "label": "FakeIncidentRepository - in-memory demo",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "sg_data_layer": {
+      "kind": "component",
+      "label": "Data",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_remote_repo": {
+      "kind": "component",
+      "label": "RetrofitIncidentRepository",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_detail_screen": {
+      "kind": "screen",
+      "label": "IncidentDetailScreen - S-04 \u2014 Detalle de incidencia",
+      "source": [
+        {
+          "artifact": "S-04 \u2014 Detalle de incidencia",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "cmp_signin_screen": {
+      "kind": "screen",
+      "label": "SignInScreen - S-01 \u2014 Iniciar sesi\u00f3n",
+      "source": [
+        {
+          "artifact": "S-01 \u2014 Iniciar sesi\u00f3n",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "cmp_incidents_screen": {
+      "kind": "screen",
+      "label": "IncidentsScreen - S-02 \u2014 Mis incidencias",
+      "source": [
+        {
+          "artifact": "S-02 \u2014 Mis incidencias",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "cmp_repository_iface": {
+      "kind": "component",
+      "label": "IncidentRepository (interface) - Q-005",
+      "source": [
+        {
+          "artifact": "mobile-app",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "cmp_new_incident_screen": {
+      "kind": "screen",
+      "label": "NewIncidentScreen - S-03 \u2014 Nueva incidencia",
+      "source": [
+        {
+          "artifact": "S-03 \u2014 Nueva incidencia",
+          "section_file": "mockups.md"
+        }
+      ]
+    }
+  },
+  "title": "mobile-app container - Compose UI, data, network, security"
+}

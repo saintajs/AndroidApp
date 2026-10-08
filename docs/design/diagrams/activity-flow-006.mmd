@@ -1,0 +1,28 @@
+flowchart TD
+  subgraph sg_lane_developer["Developer"]
+    n_start(["Start"])
+    act_env["Set DEMO_EMPLOYEE_PASSWORD, DEMO_SUPPORT_PASSWORD, TEST_DATABASE_URL (BR-029)"]
+    act_migrate["Run Alembic migration 0001_initial_schema.py (CONF-008)"]
+  end
+  subgraph sg_lane_api["api"]
+    d_env{"Both demo password env vars set? (BR-033)"}
+    n_abort(["Seed aborts with clear message - nothing created"])
+    act_seed["Run idempotent demo_seed (FUNC-009)"]
+    act_health["GET /health (BR-032)"]
+    d_health{"200 status ok?"}
+    n_ready(["Environment ready - demo sign-in works"])
+    n_fail(["Check process logs - sanitized 500 handler, no response-body details"])
+  end
+  subgraph sg_lane_db["Database"]
+    act_schema["Create users, incidents, incident_history"]
+  end
+  n_start --> act_env
+  act_env --> act_migrate
+  act_migrate --> act_schema
+  act_schema --> d_env
+  d_env -->|"no"| n_abort
+  d_env -->|"yes"| act_seed
+  act_seed --> act_health
+  act_health --> d_health
+  d_health -->|"yes"| n_ready
+  d_health -->|"no"| n_fail

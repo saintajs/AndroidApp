@@ -1,0 +1,19 @@
+sequenceDiagram
+  participant usr_developer as "Developer"
+  participant svc_api as "api (FastAPI)"
+  participant db_postgres as "PostgreSQL"
+  Note over usr_developer: export DEMO_EMPLOYEE_PASSWORD and DEMO_SUPPORT_PASSWORD and TEST_DATABASE_URL (CONF-006, BR-029)
+  usr_developer->>db_postgres: alembic upgrade head - 0001_initial_schema.py creates users incidents incident_history (CONF-008)
+  db_postgres-->>usr_developer: schema applied
+  usr_developer->>svc_api: run app/seed/demo_seed.py
+  alt DEMO_EMPLOYEE_PASSWORD or DEMO_SUPPORT_PASSWORD missing
+    svc_api-->>usr_developer: aborts with clear message - nothing created (BR-033)
+  else both env vars present
+    svc_api->>db_postgres: idempotent insert - one empleado@minisoporte.test - one support agent - three incidents covering pending in_progress resolved with consistent incident_history (FUNC-009)
+    db_postgres-->>svc_api: rows written
+    svc_api-->>usr_developer: seed complete
+  end
+  usr_developer->>svc_api: GET /health
+  svc_api-->>usr_developer: 200 status ok (FUNC-008, BR-032)
+  usr_developer->>svc_api: POST /api/auth/login as empleado@minisoporte.test (demo sign-in check)
+  svc_api-->>usr_developer: 200 access_token (FUNC-001)

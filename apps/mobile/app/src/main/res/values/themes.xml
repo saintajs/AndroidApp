@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Launch/host XML theme. The real UI theming is Compose Material 3 (ui/theme/,
+      owned by US-005) — this framework parent needs no extra library dependency and
+      only styles the window behind the Compose surface.
+    -->
+    <style name="Theme.MiniSoporte" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@color/status_bar</item>
+    </style>
+</resources>

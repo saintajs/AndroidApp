@@ -1,0 +1,9 @@
+flowchart LR
+  usr_employee["Employee"]
+  usr_support_agent["Support agent - API-only in v1"]
+  usr_developer["Developer / reviewer"]
+  sys_minisoporte["MiniSoporte - mobile-app + api + PostgreSQL 16.15"]
+  n_no_external["No external third-party integrations"]
+  usr_employee -->|"uses Android app - HTTPS JSON REST"| sys_minisoporte
+  usr_support_agent -->|"REST/JSON - status transitions"| sys_minisoporte
+  usr_developer -->|"local env setup - GET /health"| sys_minisoporte

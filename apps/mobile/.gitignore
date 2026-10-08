@@ -1,0 +1,16 @@
+# Gradle
+.gradle/
+build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+captures/
+externalNativeBuild/
+.cxx/
+
+# Local SDK path — machine-specific, never committed
+local.properties
+
+# US-011 monotonic versionCode record (verify-build-contract.sh)
+scripts/.last-versionCode

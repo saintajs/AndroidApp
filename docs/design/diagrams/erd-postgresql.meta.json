@@ -1,0 +1,56 @@
+{
+  "key": "erd-postgresql",
+  "edges": {
+    "users->incidents": [
+      {
+        "artifact": "users",
+        "section_file": "data-model.md"
+      }
+    ],
+    "users->incident_history": [
+      {
+        "artifact": "users",
+        "section_file": "data-model.md"
+      }
+    ],
+    "incidents->incident_history": [
+      {
+        "artifact": "incidents",
+        "section_file": "data-model.md"
+      }
+    ]
+  },
+  "nodes": {
+    "users": {
+      "kind": "entity",
+      "label": "users",
+      "source": [
+        {
+          "artifact": "users",
+          "section_file": "data-model.md"
+        }
+      ]
+    },
+    "incidents": {
+      "kind": "entity",
+      "label": "incidents",
+      "source": [
+        {
+          "artifact": "incidents",
+          "section_file": "data-model.md"
+        }
+      ]
+    },
+    "incident_history": {
+      "kind": "entity",
+      "label": "incident_history",
+      "source": [
+        {
+          "artifact": "incident_history",
+          "section_file": "data-model.md"
+        }
+      ]
+    }
+  },
+  "title": "PostgreSQL 16.15 ERD - users, incidents, incident_history"
+}

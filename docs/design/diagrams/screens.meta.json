@@ -1,0 +1,140 @@
+{
+  "key": "screens",
+  "edges": {
+    "ui_s04_detail->ui_s01_signin": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_s01_signin->ui_s02_incidents": [
+      {
+        "artifact": "FLOW-001",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-003",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "ui_s02_incidents->ui_s01_signin": [
+      {
+        "artifact": "FLOW-005",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-005",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "ui_s02_incidents->ui_s04_detail": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_s04_detail->ui_s02_incidents": [
+      {
+        "artifact": "FLOW-003",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_s02_incidents->ui_s01_signin#2": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_s03_new_incident->ui_s01_signin": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_s02_incidents->ui_s03_new_incident": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_s03_new_incident->ui_s02_incidents": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "ui_s03_new_incident->ui_s02_incidents#2": [
+      {
+        "artifact": "FLOW-002",
+        "section_file": "flows.md"
+      }
+    ]
+  },
+  "nodes": {
+    "ui_s01_signin": {
+      "kind": "screen",
+      "label": "S-01 \u2014 Iniciar sesi\u00f3n",
+      "source": [
+        {
+          "artifact": "S-01 \u2014 Iniciar sesi\u00f3n",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "ui_s04_detail": {
+      "kind": "screen",
+      "label": "S-04 \u2014 Detalle de incidencia",
+      "source": [
+        {
+          "artifact": "S-04 \u2014 Detalle de incidencia",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "ui_s02_incidents": {
+      "kind": "screen",
+      "label": "S-02 \u2014 Mis incidencias",
+      "source": [
+        {
+          "artifact": "S-02 \u2014 Mis incidencias",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "sg_authentication": {
+      "kind": "screen",
+      "label": "Authentication",
+      "source": [
+        {
+          "artifact": "S-01 \u2014 Iniciar sesi\u00f3n",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "ui_s03_new_incident": {
+      "kind": "screen",
+      "label": "S-03 \u2014 Nueva incidencia",
+      "source": [
+        {
+          "artifact": "S-03 \u2014 Nueva incidencia",
+          "section_file": "mockups.md"
+        }
+      ]
+    },
+    "sg_incident_management": {
+      "kind": "screen",
+      "label": "Incident management",
+      "source": [
+        {
+          "artifact": "S-02 \u2014 Mis incidencias",
+          "section_file": "mockups.md"
+        }
+      ]
+    }
+  },
+  "title": "Screens - S-01 to S-04 navigation"
+}

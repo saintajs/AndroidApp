@@ -1,0 +1,34 @@
+# MiniSoporte — LOCAL DEVELOPMENT convenience only.
+# This stack is never on any test's critical path: verification uses TEST_DATABASE_URL
+# against its own sandbox, never Docker. Schema is ALWAYS applied via
+# `alembic upgrade head` — never via bootstrap SQL (see init/01-init.sql).
+#
+# Usage (local dev only):
+#   docker compose -f infra/docker-compose.yml up -d
+services:
+  postgres:
+    # Pinned to the stack version (openspec/config.yaml stack.postgresql: 16.15).
+    # If the exact patch tag is unavailable in your registry, postgres:16 is an
+    # acceptable fallback for local dev only.
+    image: postgres:16.15
+    container_name: minisoporte-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      # Placeholders — override locally (e.g. via an untracked .env next to this file,
+      # or by exporting the variables before `docker compose up`).
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: minisoporte
+    volumes:
+      - minisoporte-pgdata:/var/lib/postgresql/data
+      # Init hook: a documented no-op stub. Schema migrations never live here.
+      - ./init/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d minisoporte"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  minisoporte-pgdata:

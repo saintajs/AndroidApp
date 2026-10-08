@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mirrors the approved background token #F5F7F5 and app bar primary #1E3A2A
+         (single source of truth for raw tokens is ui/theme/ once US-005 lands). -->
+    <color name="window_background">#F5F7F5</color>
+    <color name="status_bar">#1E3A2A</color>
+    <color name="ic_launcher_background">#1E3A2A</color>
+</resources>

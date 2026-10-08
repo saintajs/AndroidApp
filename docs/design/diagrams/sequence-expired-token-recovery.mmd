@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant usr_employee as "Employee"
+    participant ui_app as "mobile-app (Compose)"
+    participant svc_api as "api (FastAPI)"
+    participant db_postgres as "PostgreSQL"
+    ui_app->>svc_api: protected call while S-02 S-03 or S-04 waits - e.g. GET /api/incidents - Authorization Bearer JWT
+    svc_api-->>ui_app: 401 detail No autenticado - token expired malformed or invalidly signed
+    Note over ui_app: NO silent retry - no refresh mechanism exists (Q-008) - clear the Keystore token (CONF-002, BR-005)
+    ui_app-->>usr_employee: route to S-01 - interrupted action not auto-resumed
+    usr_employee->>ui_app: re-enter credentials on S-01
+    ui_app->>svc_api: POST /api/auth/login
+    alt valid credentials
+        svc_api-->>ui_app: 200 new access_token JWT - 8 h session
+        ui_app-->>usr_employee: restart at S-02 with fresh list load
+    else re-authentication fails (e.g. account deactivated)
+        svc_api-->>ui_app: 401 detail Credenciales inválidas
+        ui_app-->>usr_employee: generic inline error on S-01 (BR-002)
+    end
+    Note over ui_app,svc_api: network errors must NOT trigger this flow - only a real 401 ends the session (CONF-009)

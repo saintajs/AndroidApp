@@ -1,0 +1,128 @@
+{
+  "key": "sequence-expired-token-recovery",
+  "edges": {
+    "ui_app->ui_app": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-005",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "svc_api->ui_app": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_app->svc_api": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "GET /api/incidents",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "svc_api->ui_app#2": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "svc_api->ui_app#3": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "BR-002",
+        "section_file": "business-rules.md"
+      }
+    ],
+    "ui_app->svc_api#2": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      },
+      {
+        "artifact": "POST /api/auth/login",
+        "section_file": "api-contract.md"
+      }
+    ],
+    "ui_app->usr_employee": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "usr_employee->ui_app": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_app->usr_employee#2": [
+      {
+        "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+        "section_file": "flows.md"
+      }
+    ],
+    "ui_app->usr_employee#3": [
+      {
+        "artifact": "BR-002",
+        "section_file": "business-rules.md"
+      }
+    ]
+  },
+  "nodes": {
+    "ui_app": {
+      "kind": "service",
+      "label": "mobile-app (Compose)",
+      "source": [
+        {
+          "artifact": "Mobile app - Kotlin + Jetpack Compose",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "svc_api": {
+      "kind": "service",
+      "label": "api (FastAPI)",
+      "source": [
+        {
+          "artifact": "API - FastAPI",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "db_postgres": {
+      "kind": "database",
+      "label": "PostgreSQL",
+      "source": [
+        {
+          "artifact": "Database - PostgreSQL",
+          "section_file": "components.md"
+        }
+      ]
+    },
+    "usr_employee": {
+      "kind": "actor",
+      "label": "Employee",
+      "source": [
+        {
+          "artifact": "Expired-token recovery (401 \u2192 re-authenticate)",
+          "section_file": "flows.md"
+        }
+      ]
+    }
+  },
+  "title": "Expired-token recovery (401 \u2192 re-authenticate)"
+}
